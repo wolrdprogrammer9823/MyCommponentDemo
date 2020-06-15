@@ -1,0 +1,5 @@
+<resources>
+
+    <string name="video_app_name">video app</string>
+    <string name="video_hello">Hello blank fragment</string>
+</resources>

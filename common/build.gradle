@@ -1,0 +1,53 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+
+        //ARouter配置
+        kapt {
+            arguments {
+                arg("AROUTER_MODULE_NAME", project.getName())
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation deps.kotlinStdLib_JDK7
+    implementation deps.appcompat
+    implementation deps.design
+    implementation deps.coreKtx
+    implementation deps.constraintLayout
+    
+    implementation deps.arouterApi
+    kapt deps.arouterCompiler
+
+    //implementation deps.fastJson
+    //implementation deps.fastJsonAndroid
+    implementation deps.gson
+
+    testImplementation deps.junit
+    androidTestImplementation deps.extJunit
+    androidTestImplementation deps.espressoCore
+}

@@ -1,0 +1,72 @@
+if (isHomeDebug.toBoolean()) {
+    apply plugin: 'com.android.application'
+} else {
+    apply plugin: 'com.android.library'
+}
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+
+        //ARouter配置
+        kapt {
+            arguments {
+                arg("AROUTER_MODULE_NAME", project.getName())
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main {
+            if (isHomeDebug.toBoolean()) {
+                manifest.srcFile 'src/debug/AndroidManifest.xml'
+            } else {
+                manifest.srcFile 'src/main/AndroidManifest.xml'
+                /*集成环境下移除debug目录下文件*/
+                java {
+                    exclude 'debug/**'
+                }
+                kotlin {
+                    exclude 'debug/**'
+                }
+            }
+        }
+    }
+
+    /*设置资源前缀*/
+    resourcePrefix "home_"
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation deps.kotlinStdLib_JDK7
+    implementation deps.appcompat
+    implementation deps.design
+    implementation deps.coreKtx
+    implementation deps.constraintLayout
+    implementation deps.legacySupportV4
+    implementation deps.arouterApi
+    kapt deps.arouterCompiler
+    testImplementation deps.junit
+    androidTestImplementation deps.extJunit
+    androidTestImplementation deps.espressoCore
+    implementation project(path: ':common')
+}
