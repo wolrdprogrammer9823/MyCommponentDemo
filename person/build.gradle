@@ -1,4 +1,4 @@
-if (isPersonDebug.toBoolean()) {
+if (isBuildPersonApp.toBoolean()) {
     apply plugin: 'com.android.application'
 } else {
     apply plugin: 'com.android.library'
@@ -36,15 +36,11 @@ android {
 
     sourceSets {
         main {
-            if (isPersonDebug.toBoolean()) {
-                manifest.srcFile 'src/debug/AndroidManifest.xml'
+            if (isBuildPersonApp.toBoolean()) {
+                manifest.srcFile 'src/main/buildApp/AndroidManifest.xml'
             } else {
-                manifest.srcFile 'src/main/AndroidManifest.xml'
+                manifest.srcFile 'src/main/buildModule/AndroidManifest.xml'
                 /*集成环境下移除debug目录下的文件*/
-                java {
-                    exclude 'debug/**'
-                }
-
                 kotlin {
                     exclude 'debug/**'
                 }

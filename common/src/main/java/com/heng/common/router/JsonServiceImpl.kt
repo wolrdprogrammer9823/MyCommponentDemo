@@ -1,4 +1,4 @@
-package com.heng.common.tool
+package com.heng.common.router
 import android.content.Context
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.alibaba.android.arouter.facade.service.SerializationService

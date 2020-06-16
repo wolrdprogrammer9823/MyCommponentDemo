@@ -8,10 +8,8 @@ import com.alibaba.android.arouter.launcher.ARouter
 import com.heng.common.CommonConstant
 import com.heng.common.entity.Computer
 import com.heng.common.log.PERSON_COMPUTER
-import com.heng.common.log.PERSON_LOG
 import com.heng.common.log.PERSON_NAME
 import com.heng.common.log.PERSON_NUMBER
-import com.heng.common.tool.JsonServiceImpl
 import kotlinx.android.synthetic.main.home_fragment_home.*
 
 private const val ARG_PARAM1 = "param1"

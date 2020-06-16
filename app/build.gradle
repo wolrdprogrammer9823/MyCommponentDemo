@@ -53,6 +53,6 @@ dependencies {
 
     implementation project(path: ':common')
     if (rootProject.ext.buildMain as Boolean) {
-        implementation project(path: ':main')
+        runtimeOnly project(path: ':main')
     }
 }

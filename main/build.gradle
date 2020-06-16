@@ -1,4 +1,4 @@
-if (isMainAppDebug.toBoolean()) {
+if (isBuildMainApp.toBoolean()) {
     apply plugin: 'com.android.application'
 } else {
     apply plugin: 'com.android.library'
@@ -11,7 +11,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        if (isMainAppDebug.toBoolean()) {
+        if (isBuildMainApp.toBoolean()) {
             applicationId "com.heng.main"
         }
         minSdkVersion rootProject.ext.minSdkVersion
@@ -39,15 +39,10 @@ android {
 
     sourceSets {
         main {
-            if (isMainAppDebug.toBoolean()) {
-                manifest.srcFile 'src/debug/AndroidManifest.xml'
+            if (isBuildMainApp.toBoolean()) {
+                manifest.srcFile 'src/main/buildApp/AndroidManifest.xml'
             } else {
-                manifest.srcFile 'src/main/AndroidManifest.xml'
-
-                java {
-                    exclude 'debug/**'
-                }
-
+                manifest.srcFile 'src/main/buildModule/AndroidManifest.xml'
                 kotlin {
                     exclude 'debug/**'
                 }
@@ -73,13 +68,13 @@ dependencies {
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore
     implementation project(path: ':common')
-    if (!isHomeDebug.toBoolean()) {
+    if (!isBuildHomeApp.toBoolean()) {
         implementation project(path: ':home')
     }
-    if (!isVideoDebug.toBoolean()) {
+    if (!isBuildVideoApp.toBoolean()) {
         implementation project(path: ':video')
     }
-    if (!isPersonDebug.toBoolean()) {
+    if (!isBuildPersonApp.toBoolean()) {
         implementation project(path: ':person')
     }
 }
