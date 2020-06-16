@@ -1,5 +1,4 @@
 package com.heng.person
-import android.os.Bundle
 import android.widget.Toast
 import com.alibaba.android.arouter.facade.annotation.Autowired
 import com.alibaba.android.arouter.facade.annotation.Route
@@ -29,13 +28,16 @@ class ShareActivity : BaseActivity() {
     @Autowired(name = PERSON_COMPUTER)
     var computer: Computer? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.person_activity_share)
+    override fun initBefore() {
+        super.initBefore()
         ARouter.getInstance().inject(this)
+    }
+
+    override fun initData() {
+        super.initData()
         doPersonLog(tag, computer.toString())
-        //Toast.makeText(this, "name:$name,number:$number", Toast.LENGTH_SHORT).show()
         Toast.makeText(this, computer.toString(), Toast.LENGTH_SHORT).show()
     }
+
+    override fun getContentLayoutId(): Int = R.layout.person_activity_share
 }

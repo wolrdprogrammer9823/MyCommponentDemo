@@ -13,37 +13,37 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
 
-class SplashActivity : BaseActivity(){
+class SplashActivity : BaseActivity() {
+
+    override fun getContentLayoutId(): Int = R.layout.activity_splash
 
     @SuppressLint("CheckResult")
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun initBefore() {
+        super.initBefore()
+        disposable = Observable.timer(2000L, TimeUnit.MILLISECONDS)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                ARouter.getInstance().build(CommonConstant.TO_MAIN_ACTIVITY)
+                    .navigation(this, object : NavigationCallback {
+                        override fun onLost(postcard: Postcard?) {
+                            doAppLog("override fun onLost: ${postcard.toString()}")
+                        }
 
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
+                        override fun onFound(postcard: Postcard?) {
+                            doAppLog("override fun onFound: ${postcard.toString()}")
+                        }
 
-        disposable = Observable.timer(2000L,TimeUnit.MILLISECONDS)
-                               .observeOn(AndroidSchedulers.mainThread())
-                               .subscribe {
-            ARouter.getInstance().build(CommonConstant.TO_MAIN_ACTIVITY)
-                                 .navigation(this,object : NavigationCallback {
-                override fun onLost(postcard: Postcard?) {
-                    doAppLog("override fun onLost: ${postcard.toString()}")
-                }
+                        override fun onInterrupt(postcard: Postcard?) {
+                            doAppLog("override fun onInterrupt: ${postcard.toString()}")
+                        }
 
-                override fun onFound(postcard: Postcard?) {
-                    doAppLog("override fun onFound: ${postcard.toString()}")
-                }
+                        override fun onArrival(postcard: Postcard?) {
+                            doAppLog("override fun onArrival: ${postcard.toString()}")
+                        }
+                    })
 
-                override fun onInterrupt(postcard: Postcard?) {
-                    doAppLog("override fun onInterrupt: ${postcard.toString()}")
-                }
-
-                override fun onArrival(postcard: Postcard?) {
-                    doAppLog("override fun onArrival: ${postcard.toString()}")
-                }
-            })
-            finish()
-        }
+                finish()
+            }
     }
 
     override fun onDestroy() {

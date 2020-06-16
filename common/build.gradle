@@ -39,7 +39,9 @@ dependencies {
     implementation deps.design
     implementation deps.coreKtx
     implementation deps.constraintLayout
-    
+
+    implementation deps.legacySupportV4
+
     implementation deps.arouterApi
     kapt deps.arouterCompiler
 

@@ -15,17 +15,15 @@ import kotlinx.android.synthetic.main.main_activity_main.*
 @Route(path = CommonConstant.TO_MAIN_ACTIVITY)
 class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelectedListener {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity_main)
-    }
 
-    override fun onContentChanged() {
-        super.onContentChanged()
+    override fun initWidget() {
+        super.initWidget()
         navigation_view.setOnNavigationItemSelectedListener(this)
         navigation_view.itemBackgroundResource = android.R.color.transparent
         initHomeFragment()
     }
+
+    override fun getContentLayoutId(): Int = R.layout.main_activity_main
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
