@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/main" />
             <option value="$PROJECT_DIR$/person" />
             <option value="$PROJECT_DIR$/video" />
+            <option value="$PROJECT_DIR$/view" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

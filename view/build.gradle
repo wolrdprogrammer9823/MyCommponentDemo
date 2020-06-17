@@ -1,26 +1,19 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 29
+
 
     defaultConfig {
-        applicationId "com.heng.mycommponentdemo"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion 21
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        //ARouter配置
-        kapt {
-            arguments {
-                arg("AROUTER_MODULE_NAME", project.getName())
-            }
-        }
+        consumerProguardFiles 'consumer-rules.pro'
     }
 
     buildTypes {
@@ -39,23 +32,8 @@ dependencies {
     implementation deps.design
     implementation deps.coreKtx
     implementation deps.constraintLayout
-
-    implementation deps.arouterApi
-    kapt deps.arouterCompiler
-
-    implementation deps.rxJava
-    implementation deps.rxAndroid
-    implementation deps.rxKotlin
-
-    implementation deps.annotation
-    implementation deps.recyclerview
-
     testImplementation deps.junit
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore
-
     implementation project(path: ':common')
-    if (rootProject.ext.buildMain as Boolean) {
-        runtimeOnly project(path: ':main')
-    }
 }

@@ -49,6 +49,9 @@ dependencies {
     //implementation deps.fastJsonAndroid
     implementation deps.gson
 
+    implementation deps.annotation
+    implementation deps.recyclerview
+
     testImplementation deps.junit
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore

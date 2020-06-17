@@ -29,7 +29,10 @@ ext.deps = [
 
     //fastJson          : "com.alibaba:fastjson:1.2.70",
     //fastJsonAndroid   : "com.alibaba:fastjson:1.1.71.android",
-    gson              :  'com.google.code.gson:gson:2.8.6',
+
+    gson              : 'com.google.code.gson:gson:2.8.6',
+    recyclerview      : 'androidx.recyclerview:recyclerview:1.0.0',
+    annotation        : 'androidx.annotation:annotation:1.0.2',
 ]
 
 subprojects { project ->

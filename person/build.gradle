@@ -66,4 +66,5 @@ dependencies {
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore
     implementation project(path: ':common')
+    implementation project(path: ':view')
 }
