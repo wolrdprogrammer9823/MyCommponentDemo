@@ -6,6 +6,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.customview.widget.ViewDragHelper
+import com.heng.common.log.doCommonLog
 import kotlin.math.abs
 
 const val MAX_DEGREE = 60
@@ -16,6 +17,8 @@ class SwipeCards : ViewGroup {
     private var mCenterX = 0
     private var mCenterY = 0
     private var mCardGap = 0
+
+    private var dismissChildCount = 0
 
     private var viewDragHelper : ViewDragHelper? = null
 
@@ -41,10 +44,10 @@ class SwipeCards : ViewGroup {
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        for (i in 0.until(childCount)) {
-            val child = getChildAt(i)
+        for (i in 0.until(childCount + dismissChildCount)) {
+            val child = getChildAt(i) ?: continue
             val mLeft = mCenterX.minus(child.measuredWidth shr 1)
-            val mTop = mCenterY.minus(child.measuredHeight shr 1) + mCardGap.times(childCount - i)
+            val mTop = mCenterY.minus(child.measuredHeight shr 1) + mCardGap.times(childCount - i + dismissChildCount)
             val mRight = mLeft.plus(child.measuredWidth)
             val mBottom = mTop.plus(child.measuredHeight)
             child.layout(mLeft, mTop, mRight, mBottom)
@@ -73,7 +76,12 @@ class SwipeCards : ViewGroup {
              context.resources.displayMetrics).toInt()
 
         viewDragHelper = ViewDragHelper.create(this,object : ViewDragHelper.Callback() {
-            override fun tryCaptureView(child: View, pointerId: Int): Boolean = true
+            override fun tryCaptureView(child: View, pointerId: Int): Boolean {
+                /*每次只允许滑动最上层的那个view*/
+                val mSelectedIndex = indexOfChild(child)
+                doCommonLog("cards","mSelectedIndex $mSelectedIndex")
+                return mSelectedIndex != -1 && mSelectedIndex == childCount - 1
+            }
             override fun clampViewPositionHorizontal(child: View, left: Int, dx: Int): Int = left
             override fun clampViewPositionVertical(child: View, top: Int, dy: Int): Int = top
             override fun onViewPositionChanged(changedView: View, left: Int, top: Int, dx: Int, dy: Int) {
@@ -91,15 +99,21 @@ class SwipeCards : ViewGroup {
                 super.onViewReleased(releasedChild, xvel, yvel)
                 val left = releasedChild.left
                 val right = releasedChild.right
-                if (left > mCenterX) {
-                    //向右滑出
-                    animateToRight(releasedChild)
-                } else if (right < mCenterX) {
-                    //向左滑出
-                    animateToLeft(releasedChild)
-                } else {
-                    //复原
-                    animateToCenter(releasedChild)
+                when{
+                    left > mCenterX ->{
+                        //向右滑出
+                        animateToRight(releasedChild)
+                    }
+
+                    right < mCenterX ->{
+                        //向左滑出
+                        animateToLeft(releasedChild)
+                    }
+
+                    else ->{
+                        //复原
+                        animateToCenter(releasedChild)
+                    }
                 }
             }
         })
@@ -109,6 +123,8 @@ class SwipeCards : ViewGroup {
         val left = width.plus(releasedView.height)
         val top = releasedView.top
         viewDragHelper?.smoothSlideViewTo(releasedView, left, top)
+        this.removeViewAt(childCount - 1)
+        dismissChildCount++
         invalidate()
     }
 
@@ -116,6 +132,8 @@ class SwipeCards : ViewGroup {
         val left = -width
         val top = 0
         viewDragHelper?.smoothSlideViewTo(releaseView, left, top)
+        this.removeViewAt(childCount - 1)
+        dismissChildCount++
         invalidate()
     }
 
