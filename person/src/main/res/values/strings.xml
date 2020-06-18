@@ -2,4 +2,5 @@
 
     <string name="person_app_name">person app</string>
     <string name="person_share_txt">this is share text</string>
+    <string name="person_to_share">To Share</string>
 </resources>

@@ -6,6 +6,7 @@ import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import com.heng.common.log.doPersonLog
+import com.heng.view.entity.Bar
 
 //延迟时间
 const val DELAY = 10L
@@ -114,7 +115,7 @@ open class BarChartView : View {
                 performClick()
                 for (i in mBars.indices) {
                     val bar = mBars[i]
-                    if (bar.isInside(x, y)) {
+                    if (bar.isInside(event.x, event.y)) {
                         mEnableGrowIncrement = false
                         mSelectedIndex = i
                         invalidate()
@@ -151,12 +152,12 @@ open class BarChartView : View {
 
             //绘制当前选中点的颜色
             if (i == mSelectedIndex) {
-                mAxisPaint?.color = Color.RED
+                mBarPaint?.color = Color.RED
                 val selectX = bar.left.minus(mRadius).toFloat()
                 val selectY = bar.top.minus(mGap).toFloat()
                 mAxisPaint?.let { canvas?.drawText(bar.value.toString(),selectX,selectY,it) }
             } else {
-                mAxisPaint?.color = Color.BLUE
+                mBarPaint?.color = Color.BLUE
             }
 
             //设置条形柱状图

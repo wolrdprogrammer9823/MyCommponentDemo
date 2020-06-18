@@ -1,4 +1,4 @@
-package com.heng.view
+package com.heng.view.entity
 
 class Bar {
 
