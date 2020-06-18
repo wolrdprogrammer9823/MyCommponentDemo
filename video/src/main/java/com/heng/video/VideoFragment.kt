@@ -1,6 +1,7 @@
 package com.heng.video
 import android.os.Bundle
 import com.heng.common.base.BaseFragment
+import com.heng.common.log.doVideoLog
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -29,4 +30,10 @@ class VideoFragment : BaseFragment() {
     }
 
     override fun getContentLayoutId(): Int = R.layout.video_fragment_video
+
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        doVideoLog("video","override fun onHiddenChanged : $hidden")
+    }
+
 }

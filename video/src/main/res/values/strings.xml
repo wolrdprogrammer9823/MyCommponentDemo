@@ -2,4 +2,7 @@
 
     <string name="video_app_name">video app</string>
     <string name="video_hello">Hello blank fragment</string>
+    <string name="video_card_1">Card One</string>
+    <string name="video_card_2">Card Two</string>
+    <string name="video_card_3">Card Three</string>
 </resources>
