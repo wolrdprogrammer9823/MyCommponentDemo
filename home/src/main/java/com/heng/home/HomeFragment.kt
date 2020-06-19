@@ -54,6 +54,13 @@ class HomeFragment : BaseFragment() {
                 .greenChannel()
                 .navigation()
         }
+
+        val mAxisTexts = arrayListOf("1", "2", "3", "4", "5", "6",
+            "7", "8", "9", "10", "11", "12")
+        val dataSet = intArrayOf(12, 24, 45, 56, 89, 70, 49, 22, 23, 10, 12, 3)
+        curve_view.mMax = 89
+        curve_view.dataSet = dataSet
+        curve_view.mAxisTexts = mAxisTexts
     }
 
     override fun getContentLayoutId(): Int = R.layout.home_fragment_home
