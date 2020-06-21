@@ -3,6 +3,7 @@
     package="com.heng.main">
 
     <application>
+        <activity android:name=".LoginActivity"></activity>
         <activity android:name=".MainActivity" />
     </application>
 

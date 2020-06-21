@@ -1,4 +1,5 @@
 package com.heng.common.define
+import kotlinx.coroutines.Deferred
 import java.lang.StringBuilder
 import java.util.HashSet
 
@@ -19,4 +20,22 @@ fun encodeCookie(cookies : List<String>): String {
         sb.append(if (ite.hasNext()) ";" else "")
     }
     return sb.toString()
+}
+
+fun Deferred<Any>?.cancelByActive() = this?.run {
+    tryCatch {
+        if (isActive) {
+            cancel()
+        }
+    }
+}
+
+
+//异常处理
+inline fun tryCatch(catchBlock: (Throwable) -> Unit = {}, tryBlock: () -> Unit) {
+    try {
+        tryBlock()
+    } catch (e: Throwable) {
+        catchBlock(e)
+    }
 }
