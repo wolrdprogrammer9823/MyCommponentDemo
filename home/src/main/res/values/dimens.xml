@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="home_dp_10">10dp</dimen>
     <dimen name="home_dp_20">20dp</dimen>
+    <dimen name="home_dp_45">45dp</dimen>
     <dimen name="home_dp_300">300dp</dimen>
 </resources>

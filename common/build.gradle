@@ -49,6 +49,14 @@ dependencies {
     //implementation deps.fastJsonAndroid
     implementation deps.gson
 
+    implementation deps.kotlinxCoroutinesCore
+    implementation deps.kotlinxCoroutinesAndroid
+    implementation deps.retrofit2KotlinCoroutinesAdapter
+
+    implementation deps.retrofit
+    implementation deps.retrofitConvertGson
+    implementation deps.okhttpLoggingInterceptor
+
     implementation deps.annotation
     implementation deps.recyclerview
 

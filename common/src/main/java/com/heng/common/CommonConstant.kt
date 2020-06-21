@@ -18,4 +18,11 @@ object CommonConstant {
         PERSON_APPLICATION,
         VIDEO_APPLICATION
     )
+
+    const val REQUEST_BASE_URL = "http://wanandroid.com/"
+
+    const val SHARED_NAME = "_preferences"
+
+    //debug
+    const val INTERCEPTOR_ENABLE = false
 }
