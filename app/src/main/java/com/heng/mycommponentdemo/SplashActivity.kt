@@ -23,7 +23,7 @@ class SplashActivity : BaseActivity() {
         disposable = Observable.timer(2000L, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                ARouter.getInstance().build(CommonConstant.TO_MAIN_ACTIVITY)
+                ARouter.getInstance().build(CommonConstant.TO_LOGIN_ACTIVITY)
                     .navigation(this, object : NavigationCallback {
                         override fun onLost(postcard: Postcard?) {
                             doAppLog("override fun onLost: ${postcard.toString()}")

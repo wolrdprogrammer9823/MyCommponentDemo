@@ -1,7 +1,10 @@
 package com.heng.common
 
+import android.widget.Toast
+
 object CommonConstant {
 
+    const val TO_LOGIN_ACTIVITY = "/module/LoginActivity"
     const val TO_MAIN_ACTIVITY = "/module/MainActivity"
     const val TO_SHARE_ACTIVITY = "/person/ShareActivity"
 
@@ -21,7 +24,19 @@ object CommonConstant {
 
     const val RESULT_NULL = "result null!"
     const val REQUEST_BASE_URL = "http://wanandroid.com/"
+
     const val SHARED_NAME = "_preferences"
+    const val LOGIN_KEY = "login"
+    const val USERNAME_KEY = "username"
+    const val PASSWORD_KEY = "password"
+
+    const val CONTENT_TITLE_KEY = "title"
+
     //debug
     const val INTERCEPTOR_ENABLE = false
+
+
+    //Toast 吐司框
+    @JvmField
+    var toast : Toast? = null
 }

@@ -9,6 +9,12 @@ interface ILoginView {
     //登录失败
     fun loginFailed(message: String?)
 
+    //注册成功
+    fun registerSuccess(result: LoginResponse)
+
+    //注册失败
+    fun registerFailed(errorMessage: String?)
+
     //登录注册后操作
     fun loginRegisterAfter(result: LoginResponse)
 }

@@ -1,5 +1,4 @@
 package com.heng.main.model
-
 import com.heng.common.CommonConstant
 import com.heng.common.define.cancelByActive
 import com.heng.common.define.tryCatch
@@ -13,7 +12,11 @@ import kotlinx.coroutines.async
 
 class LoginModelImpl : ILoginModel {
 
+    //登录逻辑处理
     private var loginAsync: Deferred<LoginResponse>? = null
+
+    //注册逻辑处理
+    private var registerAsync : Deferred<LoginResponse>? = null
 
     override fun loginWanAndroid(
         loginPresenter: ILoginPresenter,
@@ -39,5 +42,32 @@ class LoginModelImpl : ILoginModel {
 
     override fun cancelLoginRequest() {
         loginAsync?.cancelByActive()
+    }
+
+    override fun registerWanAndroid(
+        loginPresenter: ILoginPresenter,
+        userName: String,
+        password: String,
+        repassword: String
+    ) {
+        GlobalScope.async(Dispatchers.Main) {
+            tryCatch({
+                it.printStackTrace()
+                loginPresenter.registerFailed(it.toString())
+            }){
+                registerAsync?.cancelByActive()
+                registerAsync = RetrofitHelper.retrofitService.registerToWanAndroid(userName,password,repassword)
+                val result = registerAsync?.await()
+                result?.let {
+                    loginPresenter.registerFailed(it.toString())
+                    return@async
+                }
+                loginPresenter.registerSuccess(result!!)
+            }
+        }
+    }
+
+    override fun cancelRegisterRequest() {
+        registerAsync?.cancelByActive()
     }
 }
