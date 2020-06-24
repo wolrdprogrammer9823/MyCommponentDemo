@@ -7,11 +7,17 @@ data class LoginResponse
     val data: Data
 ) {
     data class Data(
-        val id :Int,
-        val userName :String,
-        val password :String,
+        val id : Int,
+        val admin : Boolean,
+        val username : String,
+        val password : String,
         val icon : String?,
-        val type :String,
-        val collectionsId :List<Int>?
+        val nickname : String,
+        val publicName : String,
+        val email : String?,
+        val token : String?,
+        val type : Int,
+        val chapterTops : Array<Any>?,
+        val collectIds : Array<Any>?
     )
 }

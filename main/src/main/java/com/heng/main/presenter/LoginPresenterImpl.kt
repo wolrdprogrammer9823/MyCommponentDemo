@@ -8,8 +8,8 @@ class LoginPresenterImpl(private val loginView: ILoginView) : ILoginPresenter {
 
     private val loginModel: ILoginModel = LoginModelImpl()
 
-    override fun loginWanAndroid(userName: String, password: String) {
-        loginModel.loginWanAndroid(this, userName, password)
+    override fun loginToWanAndroidAsync(userName: String, password: String) {
+        loginModel.loginToWanAndroidAsync(this, userName, password)
     }
 
     override fun loginSuccess(result: LoginResponse) {
@@ -25,8 +25,8 @@ class LoginPresenterImpl(private val loginView: ILoginView) : ILoginPresenter {
        loginView.loginFailed(message)
     }
 
-    override fun registerWanAndroid(userName: String, password: String, repassword: String) {
-        loginModel.registerWanAndroid(this, userName, password, repassword)
+    override fun registerToWanAndroidAsync(userName: String, password: String, repassword: String) {
+        loginModel.registerToWanAndroidAsync(this, userName, password, repassword)
     }
 
     override fun registerSuccess(result: LoginResponse) {

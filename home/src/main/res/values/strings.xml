@@ -1,4 +1,4 @@
 <resources>
     <string name="home_app_name">home app</string>
-    <string name="home_go_share">跳转到分享组件</string>
+    <string name="home_go_others">跳转到其他组件</string>
 </resources>

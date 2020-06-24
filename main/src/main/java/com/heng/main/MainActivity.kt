@@ -34,10 +34,9 @@ class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelec
                 val transaction = supportFragmentManager.beginTransaction()
                 if (fragments[0] == null) {
                     fragments[0] = HomeFragment.newInstance("home","home") as Fragment
-                    fragments[0]?.let { transaction.add(R.id.fl_content, it).commit() }
-                } else {
-                    hideAndShowFragment(currentIndex, transaction)
+                    fragments[0]?.let { transaction.add(R.id.fl_content, it) }
                 }
+                hideAndShowFragment(currentIndex, transaction)
                 return true
             }
             R.id.navigation_video ->{
@@ -48,10 +47,9 @@ class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelec
                 val transaction = supportFragmentManager.beginTransaction()
                 if (fragments[1] == null) {
                     fragments[1] = VideoFragment.newInstance("video","video") as Fragment
-                    fragments[1]?.let { transaction.add(R.id.fl_content, it).commit() }
-                } else {
-                    hideAndShowFragment(currentIndex, transaction)
+                    fragments[1]?.let { transaction.add(R.id.fl_content, it)}
                 }
+                hideAndShowFragment(currentIndex, transaction)
                 return true
             }
             R.id.navigation_personal ->{
@@ -62,10 +60,9 @@ class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelec
                 val transaction = supportFragmentManager.beginTransaction()
                 if (fragments[2] == null) {
                     fragments[2] = PersonFragment.newInstance("person","person") as Fragment
-                    fragments[2]?.let { transaction.add(R.id.fl_content, it).commit() }
-                } else {
-                    hideAndShowFragment(currentIndex, transaction)
+                    fragments[2]?.let { transaction.add(R.id.fl_content, it) }
                 }
+                hideAndShowFragment(currentIndex, transaction)
                 return true
             }
         }
@@ -77,10 +74,9 @@ class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelec
         val transaction = supportFragmentManager.beginTransaction()
         if (fragments[0] == null) {
             fragments[0] = HomeFragment.newInstance("home","home") as Fragment
-            fragments[0]?.let { transaction.add(R.id.fl_content, it).commit() }
-        } else {
-            hideAndShowFragment(currentIndex, transaction)
+            fragments[0]?.let { transaction.add(R.id.fl_content, it) }
         }
+        hideAndShowFragment(currentIndex, transaction)
     }
 
     private fun hideAndShowFragment(index: Int, transaction: FragmentTransaction) {

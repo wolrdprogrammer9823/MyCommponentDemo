@@ -3,7 +3,8 @@
     package="com.heng.video">
 
     <application>
-        <activity android:name=".VideoActivity"/>
+        <activity android:name=".CardsActivity"></activity>
+        <activity android:name=".VideoActivity" />
     </application>
 
 </manifest>

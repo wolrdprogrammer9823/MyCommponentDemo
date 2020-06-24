@@ -1,12 +1,13 @@
 package com.heng.common.base
-import android.app.Application
+import androidx.multidex.MultiDex
+import androidx.multidex.MultiDexApplication
 import com.alibaba.android.arouter.launcher.ARouter
 import com.heng.common.BuildConfig
 import com.heng.common.CommonConstant
 import com.heng.common.log.doCommonLog
 import com.heng.common.router.IComponentApplication
 
-class BaseApplication : Application() {
+class BaseApplication : MultiDexApplication() {
 
     private val commonTag = BaseApplication::class.java.simpleName
 
@@ -23,6 +24,8 @@ class BaseApplication : Application() {
 
         ARouter.init(this)
         moduleInit()
+
+        MultiDex.install(this)
     }
 
     /*模块初始化*/

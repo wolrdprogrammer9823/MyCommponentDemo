@@ -33,49 +33,51 @@ object RetrofitHelper {
         val okHttpClientBuilder = OkHttpClient().newBuilder().apply {
             connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+
             //获取响应的cookies
-            addInterceptor {
-               val request = it.request()
-               val response = it.proceed(request)
-               val requestUrl = request.url().toString()
-               val domain = request.url().host()
-               if ((requestUrl.contains(SAVE_USER_LOGIN_KEY) || requestUrl.contains(
-                       SAVE_USER_REGISTER_KEY)) && request.header(SET_COOKIE_KEY)!!.isNotEmpty()) {
-                   val cookies = response.headers(SET_COOKIE_KEY)
-                   val cookie = encodeCookie(cookies)
-                   saveCookie(requestUrl, domain, cookie)
-               }
-               response
-            }
+//            addInterceptor {
+//               val request = it.request()
+//               val response = it.proceed(request)
+//               val requestUrl = request.url().toString()
+//               val domain = request.url().host()
+//               if ((requestUrl.contains(SAVE_USER_LOGIN_KEY) || requestUrl.contains(
+//                       SAVE_USER_REGISTER_KEY)) && request.header(SET_COOKIE_KEY)!!.isNotEmpty()) {
+//                   val cookies = response.headers(SET_COOKIE_KEY)
+//                   val cookie = encodeCookie(cookies)
+//                   saveCookie(requestUrl, domain, cookie)
+//               }
+//               response
+//            }
 
-            //设置请求的cookie
-            addInterceptor {
-                val request = it.request()
-                val builder = request.newBuilder()
-                val domain = request.url().host()
-                if (domain.isNotEmpty()) {
-                    val spDomain: String by Preference(domain, "")
-                    val cookie = if (spDomain.isNotEmpty()) spDomain else ""
-                    if (cookie.isNotEmpty()) {
-                        builder.addHeader(COOKIE_NAME, cookie)
-                    }
-                }
-                it.proceed(builder.build())
-            }
-
-            if (CommonConstant.INTERCEPTOR_ENABLE) {
-                addInterceptor(HttpLoggingInterceptor(HttpLoggingInterceptor.Logger {
-                    doHttpLog(TAG, CONTENT_PRE + it)
-                }).apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                })
-            }
+//            //设置请求的cookie
+//            addInterceptor {
+//                val request = it.request()
+//                val builder = request.newBuilder()
+//                val domain = request.url().host()
+//                if (domain.isNotEmpty()) {
+//                    val spDomain: String by Preference(domain, "")
+//                    val cookie = if (spDomain.isNotEmpty()) spDomain else ""
+//                    if (cookie.isNotEmpty()) {
+//                        builder.addHeader(COOKIE_NAME, cookie)
+//                    }
+//                }
+//                it.proceed(builder.build())
+//            }
+//
+//            if (CommonConstant.INTERCEPTOR_ENABLE) {
+//                addInterceptor(HttpLoggingInterceptor(HttpLoggingInterceptor.Logger {
+//                    doHttpLog(TAG, CONTENT_PRE + it)
+//                }).apply {
+//                    level = HttpLoggingInterceptor.Level.BODY
+//                })
+//            }
         }
+
         return RetrofitBuild(
             url = url,
             client = okHttpClientBuilder.build(),
             gsonConverterFactory = GsonConverterFactory.create(),
-            coroutineCallbackAdapter = CoroutineCallAdapterFactory.invoke()
+            coroutineCallbackAdapter = CoroutineCallAdapterFactory()
         ).retrofit
     }
 

@@ -21,10 +21,14 @@
         app:dot_normal_color="@android:color/holo_red_dark"
         app:dot_selected_color="@android:color/holo_blue_dark"/>
 
-    <androidx.appcompat.widget.AppCompatButton
+    <com.heng.view.CommonShapeButton
         android:id="@+id/btn_next"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/person_dp_35"
         android:text="@string/person_to_share"
-        android:layout_marginTop="20dp"/>
+        app:csb_fillColor="@android:color/holo_orange_light"
+        android:layout_marginTop="@dimen/person_dp_20"
+        android:layout_marginStart="@dimen/person_dp_20"
+        android:layout_marginEnd="@dimen/person_dp_20"
+        />
 </androidx.appcompat.widget.LinearLayoutCompat>

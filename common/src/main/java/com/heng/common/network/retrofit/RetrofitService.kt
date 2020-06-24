@@ -8,9 +8,8 @@ import retrofit2.http.POST
 interface RetrofitService {
 
     //登录操作
-    @POST(value = "value/login")
-    @FormUrlEncoded
-    fun loginToWanAndroid(
+    @POST(value = "user/login")
+    fun loginToWanAndroidAsync(
         @Field("username") userName: String,
         @Field("password") password: String
     ): Deferred<LoginResponse>
@@ -19,7 +18,7 @@ interface RetrofitService {
     //注册操作
     @POST(value = "user/register")
     @FormUrlEncoded
-    fun registerToWanAndroid(
+    fun registerToWanAndroidAsync(
         @Field("username") userName: String,
         @Field("password") password: String,
         @Field("repassword") repassword: String

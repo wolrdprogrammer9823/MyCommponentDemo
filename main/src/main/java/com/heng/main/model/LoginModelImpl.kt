@@ -5,10 +5,7 @@ import com.heng.common.define.tryCatch
 import com.heng.common.network.retrofit.RetrofitHelper
 import com.heng.common.network.retrofit.bean.LoginResponse
 import com.heng.main.presenter.ILoginPresenter
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 
 class LoginModelImpl : ILoginModel {
 
@@ -18,33 +15,33 @@ class LoginModelImpl : ILoginModel {
     //注册逻辑处理
     private var registerAsync : Deferred<LoginResponse>? = null
 
-    override fun loginWanAndroid(
+    override fun loginToWanAndroidAsync(
         loginPresenter: ILoginPresenter,
         userName: String,
         password: String
     ) {
-        GlobalScope.async(Dispatchers.Main) {
-           tryCatch({
-               it.printStackTrace()
-               loginPresenter.longFailed(it.toString())
-           }){
-               loginAsync?.cancelByActive()
-               loginAsync = RetrofitHelper.retrofitService.loginToWanAndroid(userName, password)
-               val result = loginAsync?.await()
-               result?.let {
-                   loginPresenter.longFailed(CommonConstant.RESULT_NULL)
-                   return@async
-               }
-               loginPresenter.loginSuccess(result!!)
-           }
-        }
+       GlobalScope.async(Dispatchers.Main) {
+            tryCatch({
+                it.printStackTrace()
+                loginPresenter.longFailed(it.toString())
+            }) {
+                loginAsync?.cancelByActive()
+                loginAsync = RetrofitHelper.retrofitService.loginToWanAndroidAsync(userName, password)
+                val result = loginAsync?.await()
+                result?.let {
+                    loginPresenter.longFailed(CommonConstant.RESULT_NULL)
+                    return@async
+                }
+                loginPresenter.loginSuccess(result!!)
+            }
+       }
     }
 
     override fun cancelLoginRequest() {
         loginAsync?.cancelByActive()
     }
 
-    override fun registerWanAndroid(
+    override fun registerToWanAndroidAsync(
         loginPresenter: ILoginPresenter,
         userName: String,
         password: String,
@@ -56,7 +53,7 @@ class LoginModelImpl : ILoginModel {
                 loginPresenter.registerFailed(it.toString())
             }){
                 registerAsync?.cancelByActive()
-                registerAsync = RetrofitHelper.retrofitService.registerToWanAndroid(userName,password,repassword)
+                registerAsync = RetrofitHelper.retrofitService.registerToWanAndroidAsync(userName,password,repassword)
                 val result = registerAsync?.await()
                 result?.let {
                     loginPresenter.registerFailed(it.toString())

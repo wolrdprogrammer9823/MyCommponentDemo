@@ -36,6 +36,7 @@ android {
 
     sourceSets {
         main {
+
             if (isBuildVideoApp.toBoolean()) {
                 manifest.srcFile 'src/main/buildApp/AndroidManifest.xml'
             } else {
@@ -45,11 +46,13 @@ android {
                     exclude 'debug/**'
                 }
             }
+
+            jniLibs.srcDirs = ['src/main/jniLibs']
         }
     }
 
     /*设置资源前缀*/
-    resourcePrefix "video"
+    resourcePrefix "video_"
 }
 
 dependencies {
@@ -61,6 +64,7 @@ dependencies {
     implementation deps.constraintLayout
     implementation deps.legacySupportV4
     implementation deps.arouterApi
+    implementation files('libs/pldroid-player-2.1.9.jar')
     kapt deps.arouterCompiler
     testImplementation deps.junit
     androidTestImplementation deps.extJunit

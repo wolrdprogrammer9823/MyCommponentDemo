@@ -4,14 +4,22 @@ import android.content.Intent
 import android.text.TextUtils
 import android.view.View
 import com.alibaba.android.arouter.facade.annotation.Route
+import com.alibaba.android.arouter.launcher.ARouter
 import com.heng.common.CommonConstant
 import com.heng.common.base.BaseActivity
 import com.heng.common.define.Preference
 import com.heng.common.define.toast
+import com.heng.common.log.doAppLog
+import com.heng.common.network.retrofit.RetrofitHelper
 import com.heng.common.network.retrofit.bean.LoginResponse
 import com.heng.main.presenter.LoginPresenterImpl
 import com.heng.main.view.ILoginView
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import kotlinx.android.synthetic.main.main_activity_login.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import retrofit2.converter.gson.GsonConverterFactory
 
 @Route(path = CommonConstant.TO_LOGIN_ACTIVITY)
 class LoginActivity : BaseActivity() ,ILoginView {
@@ -29,6 +37,17 @@ class LoginActivity : BaseActivity() ,ILoginView {
         LoginPresenterImpl(this)
     }
 
+    private val gitHubServiceApi by lazy {
+        val retrofit = retrofit2.Retrofit.Builder()
+            .baseUrl("https://api.github.com")
+            //.baseUrl(CommonConstant.REQUEST_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            //添加对 Deferred 的支持
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .build()
+        retrofit.create(GitHubServiceApi::class.java)
+    }
+
     override fun getContentLayoutId(): Int = R.layout.main_activity_login
 
     override fun initWidget() {
@@ -36,6 +55,13 @@ class LoginActivity : BaseActivity() ,ILoginView {
         login_btn.setOnClickListener(onClickListener)
         register_btn.setOnClickListener(onClickListener)
         login_exit_iv.setOnClickListener(onClickListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        login_progressbar?.let {
+            it.visibility = View.GONE
+        }
     }
 
     override fun loginSuccess(result: LoginResponse) {
@@ -66,12 +92,12 @@ class LoginActivity : BaseActivity() ,ILoginView {
     override fun loginRegisterAfter(result: LoginResponse) {
         login_progressbar.visibility = View.GONE
         mIsLogin = true
-        mUserName = result.data.userName
+        mUserName = result.data.username
         mPassword = result.data.password
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(
                 CommonConstant.CONTENT_TITLE_KEY,
-                result.data.userName
+                result.data.username
             ) })
         finish()
     }
@@ -81,7 +107,7 @@ class LoginActivity : BaseActivity() ,ILoginView {
             R.id.register_btn->{
                 if (checkContent()) {
                     login_progressbar.visibility = View.VISIBLE
-                    loginPresenterImpl.registerWanAndroid(
+                    loginPresenterImpl.registerToWanAndroidAsync(
                         username_et.text.trim().toString(),
                         password_et.text.trim().toString(),
                         password_et.text.trim().toString())
@@ -90,10 +116,29 @@ class LoginActivity : BaseActivity() ,ILoginView {
             R.id.login_btn->{
                 if (checkContent()) {
                     login_progressbar.visibility = View.VISIBLE
-                    loginPresenterImpl.loginWanAndroid(
-                        username_et.text.trim().toString(),
-                        password_et.text.trim().toString()
-                    )
+//                    loginPresenterImpl.loginToWanAndroidAsync(
+//                        username_et.text.trim().toString(),
+//                        password_et.text.trim().toString()
+//                    )
+
+//                    try {
+//                        GlobalScope.launch(Dispatchers.Main) {
+//                            //val loginAsync = RetrofitHelper.retrofitService.loginToWanAndroidAsync(username_et.text.trim().toString(), password_et.text.trim().toString())
+//                            //val loginAsync =  gitHubServiceApi.loginToWanAndroidAsync(username_et.text.trim().toString(), password_et.text.trim().toString())
+//                            val loginAsync = gitHubServiceApi.getMyUserAsync("bennyhuo")
+//                            val result = loginAsync.await()
+//                            result?.let {
+//                                doAppLog("failed!!")
+//                            }
+//                            doAppLog("success!!")
+//                        }
+//                    } catch (e: Exception) {
+//                        doAppLog(e.toString())
+//                    }
+
+                    ARouter.getInstance().build(CommonConstant.TO_MAIN_ACTIVITY).greenChannel()
+                        .navigation(this)
+                    finish()
                 }
             }
             R.id.login_exit_iv->{

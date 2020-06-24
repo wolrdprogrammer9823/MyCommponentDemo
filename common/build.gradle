@@ -21,6 +21,8 @@ android {
                 arg("AROUTER_MODULE_NAME", project.getName())
             }
         }
+
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -28,6 +30,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = rootProject.ext.sourceCompatibility
+        targetCompatibility = rootProject.ext.targetCompatibility
     }
 
 }
@@ -59,6 +66,8 @@ dependencies {
 
     implementation deps.annotation
     implementation deps.recyclerview
+
+    implementation deps.multidex
 
     testImplementation deps.junit
     androidTestImplementation deps.extJunit

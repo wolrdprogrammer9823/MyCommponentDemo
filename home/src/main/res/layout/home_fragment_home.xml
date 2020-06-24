@@ -9,29 +9,26 @@
     android:orientation="vertical"
     tools:context=".HomeFragment">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_share"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/home_dp_20"
-        android:layout_marginStart="@dimen/home_dp_20"
-        android:text="@string/home_go_share"/>
-
     <com.heng.view.CurveView
         android:id="@+id/curve_view"
         android:layout_width="match_parent"
         android:layout_height="@dimen/home_dp_300"
+        android:layout_marginTop="@dimen/home_dp_20"
         android:paddingTop="@dimen/home_dp_20"
         android:paddingStart="@dimen/home_dp_20"
         android:paddingEnd="@dimen/home_dp_20"/>
 
     <com.heng.view.CommonShapeButton
-        android:layout_width="@dimen/home_dp_300"
+        android:id="@+id/btn_others"
+        android:layout_width="match_parent"
         android:layout_height="@dimen/home_dp_45"
         android:layout_marginTop="@dimen/home_dp_20"
+        android:layout_marginStart="@dimen/home_dp_20"
+        android:layout_marginEnd="@dimen/home_dp_20"
         app:csb_activeEnable="true"
         app:csb_fillColor="@color/colorAccent"
         app:csb_pressedColor="@color/colorPrimaryDark"
-        app:csb_cornerRadius="@dimen/home_dp_10"/>
+        app:csb_cornerRadius="@dimen/home_dp_10"
+        android:text="@string/home_go_others"/>
 
 </androidx.appcompat.widget.LinearLayoutCompat>

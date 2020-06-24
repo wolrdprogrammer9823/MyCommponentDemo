@@ -4,7 +4,7 @@ import com.heng.main.presenter.ILoginPresenter
 interface ILoginModel {
 
     //登录
-    fun loginWanAndroid(
+    fun loginToWanAndroidAsync(
         loginPresenter: ILoginPresenter,
         userName: String,
         password: String
@@ -16,7 +16,7 @@ interface ILoginModel {
 
 
     //注册
-    fun registerWanAndroid(
+    fun registerToWanAndroidAsync(
         loginPresenter: ILoginPresenter,
         userName: String,
         password: String,

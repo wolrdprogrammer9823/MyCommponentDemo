@@ -45,9 +45,9 @@ class HomeFragment : BaseFragment() {
 
     override fun initData() {
         val computer = Computer(1090,"Dell 101",5005.0)
-        btn_share.setOnClickListener {
+        btn_others.setOnClickListener {
             ARouter.getInstance()
-                .build(CommonConstant.TO_SHARE_ACTIVITY)
+                .build(CommonConstant.TO_CARDS_ACTIVITY)
                 .withString(PERSON_NAME, "tom")
                 .withInt(PERSON_NUMBER, 1180)
                 .withObject(PERSON_COMPUTER, computer)
