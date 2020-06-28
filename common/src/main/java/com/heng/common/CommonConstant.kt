@@ -8,6 +8,7 @@ object CommonConstant {
     const val TO_MAIN_ACTIVITY = "/module/MainActivity"
     const val TO_SHARE_ACTIVITY = "/person/ShareActivity"
     const val TO_CARDS_ACTIVITY = "/video/CardsActivity"
+    const val TO_VIDEO_LANDSCAPE_ACTIVITY = "/video/VideoLandscapeActivity"
 
     private const val APP_APPLICATION = "com.heng.mycommponentdemo.AppApplication"
     private const val MAIN_APPLICATION = "com.heng.main.MainApplication"

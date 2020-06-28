@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="video_dp_5">5dp</dimen>
+    <dimen name="video_dp__15">-15dp</dimen>
+    <dimen name="video_dp_15">15dp</dimen>
+    <dimen name="video_dp_25">25dp</dimen>
+    <dimen name="video_dp_30">30dp</dimen>
+    <dimen name="video_dp_45">45dp</dimen>
+    <dimen name="video_dp_60">60dp</dimen>
+    <dimen name="video_dp_300">300dp</dimen>
+    <dimen name="video_dp_400">400dp</dimen>
+    <dimen name="video_dp_600">600dp</dimen>
+</resources>

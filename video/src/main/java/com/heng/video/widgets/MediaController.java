@@ -1,4 +1,5 @@
 package com.heng.video.widgets;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
@@ -20,7 +21,9 @@ import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
 import com.pili.pldroid.player.IMediaController;
+
 import java.util.Locale;
 
 /**
@@ -36,13 +39,14 @@ public class MediaController extends FrameLayout implements IMediaController {
     private int mAnimStyle;
     private View mAnchor;
     private View mRoot;
+    private View mDefineView;
     private ProgressBar mProgress;
     private TextView mEndTime, mCurrentTime;
     private long mDuration;
     private boolean mShowing;
     private boolean mDragging;
     private boolean mInstantSeeking = true;
-    private long mSeekPosition = 0l;
+    private long mSeekPosition = 0L;
     private static int sDefaultTimeout = 3000;
     private static final int SEEK_TO_POST_DELAY_MILLIS = 200;
 
@@ -93,10 +97,11 @@ public class MediaController extends FrameLayout implements IMediaController {
             initFloatingWindow();
     }
 
-    public MediaController(Context context, boolean useFastForward, boolean disableProgressBar) {
+    public MediaController(Context context, boolean useFastForward, boolean disableProgressBar,View defineView) {
         this(context);
         mUseFastForward = useFastForward;
         mDisableProgress = disableProgressBar;
+        mDefineView = defineView;
     }
 
     public MediaController(Context context, boolean useFastForward) {
@@ -186,7 +191,7 @@ public class MediaController extends FrameLayout implements IMediaController {
                 seeker.setThumbOffset(1);
             }
             mProgress.setMax(1000);
-            mProgress.setEnabled(!mDisableProgress);
+
         }
 
         mEndTime = (TextView) v.findViewById(END_TIME_ID);
@@ -285,10 +290,13 @@ public class MediaController extends FrameLayout implements IMediaController {
         }
 
         long position = mPlayer.getCurrentPosition();
+        Log.d("TAG", "position:" + position);
         long duration = mPlayer.getDuration();
+        Log.d("TAG", "duration:" + duration);
         if (mProgress != null) {
             if (duration > 0) {
                 long pos = 1000L * position / duration;
+                Log.d("TAG", "pos:" + pos);
                 mProgress.setProgress((int) pos);
             }
             int percent = mPlayer.getBufferPercentage();
@@ -403,21 +411,25 @@ public class MediaController extends FrameLayout implements IMediaController {
                 return;
             }
 
-
             final long newposition = (long) (mDuration * progress) / 1000;
+            Log.d("MediaController","newposition:" + newposition);
             String time = generateTime(newposition);
             if (mInstantSeeking) {
                 mHandler.removeCallbacks(mLastSeekBarRunnable);
                 mLastSeekBarRunnable = new Runnable() {
                     @Override
                     public void run() {
+                        Log.d("MediaController", "mPlayer != null->" + (mPlayer != null));
+                        Log.d("MediaController","mPlayer.seekTo(newposition)");
                         mPlayer.seekTo(newposition);
                     }
                 };
                 mHandler.postDelayed(mLastSeekBarRunnable, SEEK_TO_POST_DELAY_MILLIS);
             }
-            if (mCurrentTime != null)
+            if (mCurrentTime != null) {
+                Log.d("MediaController","time:" + time);
                 mCurrentTime.setText(time);
+            }
         }
 
         public void onStopTrackingTouch(SeekBar bar) {
@@ -512,21 +524,34 @@ public class MediaController extends FrameLayout implements IMediaController {
 
                 if (mAnchor != null) {
                     mAnchor.getLocationOnScreen(location);
+
+                    Log.d(this.getClass().getSimpleName(), "location[0]:" + location[0]);
+                    Log.d(this.getClass().getSimpleName(), "location[1]:" + location[1]);
+
                     Rect anchorRect = new Rect(location[0], location[1],
                             location[0] + mAnchor.getWidth(), location[1]
                             + mAnchor.getHeight());
 
-                    mWindow.setAnimationStyle(mAnimStyle);
-                    mWindow.showAtLocation(mAnchor, Gravity.BOTTOM,
-                            anchorRect.left, 0);
-                } else {
-                    Rect anchorRect = new Rect(location[0], location[1],
-                            location[0] + mRoot.getWidth(), location[1]
-                            + mRoot.getHeight());
+                    int height = mAnchor.getLayoutParams().height;
+                    Log.d(this.getClass().getSimpleName(), "height:" + height);
+                    Log.d(this.getClass().getSimpleName(), mAnchor.getLayoutParams().getClass().getName());
 
                     mWindow.setAnimationStyle(mAnimStyle);
-                    mWindow.showAtLocation(mRoot, Gravity.BOTTOM,
-                            anchorRect.left, 0);
+                    mWindow.showAsDropDown(mDefineView, 0, 0);
+                    //mWindow.showAtLocation(mDefineView, Gravity.BOTTOM, 0, 0);
+                    Log.d(this.getClass().getSimpleName(), "mAnchor != null");
+                } else {
+                    Rect anchorRect = new Rect(location[0], location[1],
+                            location[0] + mRoot.getWidth(),
+                            location[1] + mRoot.getHeight());
+
+                    mWindow.setAnimationStyle(mAnimStyle);
+                    mWindow.showAtLocation(mRoot, Gravity.BOTTOM, anchorRect.left, 0);
+
+                    Log.d(this.getClass().getSimpleName(), "location[0]:" + location[0]);
+                    Log.d(this.getClass().getSimpleName(), "location[1]:" + location[1]);
+
+                    Log.d(this.getClass().getSimpleName(), "mAnchor == null");
                 }
             }
             mShowing = true;
@@ -538,8 +563,7 @@ public class MediaController extends FrameLayout implements IMediaController {
 
         if (timeout != 0) {
             mHandler.removeMessages(FADE_OUT);
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(FADE_OUT),
-                    timeout);
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(FADE_OUT), timeout);
         }
     }
 
@@ -594,5 +618,30 @@ public class MediaController extends FrameLayout implements IMediaController {
 
     public long getSeekPosition() {
         return mSeekPosition;
+    }
+
+    private int getCurrentProgress() {
+        if (mProgress != null) {
+            return mProgress.getProgress();
+        }
+        return 0;
+    }
+
+    public void seekToPosition(long duration) {
+        if (mProgress == null) {
+            Log.d("MediaController", "mProgress == null");
+            return;
+        }
+        Log.d("MediaController","progress:" + mProgress.getProgress());
+        final long newPosition = (long) (duration * mProgress.getProgress()) / 1000;
+        Log.d("MediaController","newPosition:" + newPosition);
+        String time = generateTime(newPosition);
+        Log.d("MediaController","time:" + time);
+        if (mCurrentTime != null) {
+            mCurrentTime.setText(time);
+        }
+        if (mPlayer != null) {
+            mPlayer.seekTo(newPosition);
+        }
     }
 }

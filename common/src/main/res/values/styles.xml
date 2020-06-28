@@ -9,6 +9,8 @@
 
 
     <style name="BaseTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="SplashTheme" parent="BaseTheme">

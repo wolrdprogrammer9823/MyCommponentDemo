@@ -3,8 +3,13 @@
     package="com.heng.video">
 
     <application>
-        <activity android:name=".CardsActivity"></activity>
+        <activity android:name=".CardsActivity" />
         <activity android:name=".VideoActivity" />
+        <activity
+            android:name=".VideoLandscapeActivity"
+            android:theme="@style/BaseTheme"
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>

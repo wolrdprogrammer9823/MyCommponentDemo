@@ -1,20 +1,36 @@
 package com.heng.video
 import android.os.Bundle
+import android.view.View
+import com.alibaba.android.arouter.launcher.ARouter
+import com.heng.common.CommonConstant
 import com.heng.common.base.BaseFragment
+import com.heng.common.log.VIDEO_CURRENT_POSITION
+import com.heng.common.log.VIDEO_IS_PLAYED
+import com.heng.common.log.VIDEO_PATH
 import com.heng.common.log.doVideoLog
+import com.heng.common.util.CdTimeUtil
+import com.heng.video.interfaces.ICommunication
+import com.heng.video.widgets.DeMediaController
 import com.heng.video.widgets.MediaController
 import com.pili.pldroid.player.*
+import com.pili.pldroid.player.widget.PLVideoView
 import kotlinx.android.synthetic.main.video_fragment_video.*
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
-class VideoFragment : BaseFragment() {
+//要播放的视频url
+private const val path = "http://demo-videos.qnsdk.com/movies/qiniu.mp4"
+
+class VideoFragment : BaseFragment(), ICommunication {
 
     private var param1: String? = null
     private var param2: String? = null
 
-    private var mediaController : MediaController? = null
+    private var mediaController: MediaController? = null
+
+    private var inPlayState = false
+    private var mDisplayAspectRatio = PLVideoView.ASPECT_RATIO_FIT_PARENT
 
     companion object {
         @JvmStatic
@@ -36,12 +52,14 @@ class VideoFragment : BaseFragment() {
 
     override fun getContentLayoutId(): Int = R.layout.video_fragment_video
 
+    override fun firstInit() {
+        super.firstInit()
+        play_pause_iv.setOnClickListener(onClickListener)
+    }
+
     override fun initData() {
 
         super.initData()
-
-        //要播放的视频url
-        val path = "http://demo-videos.qnsdk.com/movies/qiniu.mp4"
 
         //设置封面view
         pl_video_view.setCoverView(cover_iv)
@@ -66,33 +84,34 @@ class VideoFragment : BaseFragment() {
 
         pl_video_view.setVideoPath(path)
 
-        mediaController = MediaController(requireContext(), true, false)
-        mediaController?.setOnClickSpeedAdjustListener(onClickSpeedAdjustListener)
+//        mediaController = MediaController(requireContext(), true, false, pl_video_view)
+//        mediaController?.setOnClickSpeedAdjustListener(onClickSpeedAdjustListener)
+//        pl_video_view.setMediaController(mediaController)
 
-        pl_video_view.setMediaController(mediaController)
-
-        pl_video_view.start()
+        pl_video_view.setMediaController(DeMediaController(requireContext(), pl_video_view, this))
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
         doVideoLog("override fun onHiddenChanged : $hidden")
-        if (hidden) {
-            if (pl_video_view != null) {
-                pl_video_view.pause()
-            }
-        } else {
-            if (pl_video_view != null) {
-                pl_video_view.start()
-            }
+        //已经播放过视频了,Fragment切换之后才切换视频状态
+        changeVideoStateWhenOnHiddenChanged(hidden)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (pl_video_view != null && inPlayState) {
+            pl_video_view.start()
+            setPlayPauseIvBg(false)
         }
     }
 
     override fun onPause() {
         super.onPause()
         mediaController?.window?.dismiss()
-        if (pl_video_view != null) {
+        if (pl_video_view != null && pl_video_view.isPlaying) {
             pl_video_view.pause()
+            setPlayPauseIvBg(true)
         }
     }
 
@@ -103,56 +122,69 @@ class VideoFragment : BaseFragment() {
         }
     }
 
+    override fun navigationToActivity() {
+        ARouter.getInstance()
+            .build(CommonConstant.TO_VIDEO_LANDSCAPE_ACTIVITY)
+            .withString(VIDEO_PATH, path)
+            .withLong(VIDEO_CURRENT_POSITION, pl_video_view.currentPosition)
+            .withBoolean(VIDEO_IS_PLAYED, pl_video_view.isPlaying)
+            .navigation()
+    }
+
     //视频大小发生改变
     private val onVideoSizeChangedListener = PLOnVideoSizeChangedListener { width, height ->
         doVideoLog("width:$width,height:$height")
     }
 
     //视频帧率发生改变
-    private val onVideoFrameListener = PLOnVideoFrameListener{ data, size, width, height, format, ts->
-        doVideoLog("data:${String(data)},size:$size,width:$width,height:$height,format:$format,ts:$ts")
-    }
-   
+    private val onVideoFrameListener =
+        PLOnVideoFrameListener { data, size, width, height, format, ts ->
+            doVideoLog("data:${String(data)},size:$size,width:$width,height:$height,format:$format,ts:$ts")
+        }
+
     //音频帧率发生改变
-    private val onAudioFrameListener = PLOnAudioFrameListener { data, size, sampleRate, channels, dataWidth, ts ->
-        doVideoLog("data:${String(data)},size:$size,sampleRate:$sampleRate,channels:$channels,dataWidth:$dataWidth,ts:$ts")
-    }
+    private val onAudioFrameListener =
+        PLOnAudioFrameListener { data, size, sampleRate, channels, dataWidth, ts ->
+            doVideoLog("data:${String(data)},size:$size,sampleRate:$sampleRate,channels:$channels,dataWidth:$dataWidth,ts:$ts")
+        }
 
     //缓冲更新
-    private val onBufferingUpdateListener = PLOnBufferingUpdateListener{percent->
+    private val onBufferingUpdateListener = PLOnBufferingUpdateListener { percent ->
         doVideoLog("percent:$percent")
     }
 
     //视频播放完成监听
-    private val onCompleteListener = PLOnCompletionListener{
+    private val onCompleteListener = PLOnCompletionListener {
         doVideoLog("video is completed!!!")
+        pl_video_view.pause()
+        setPlayPauseIvBg(true)
     }
-     
+
     //视频发生错误监听
-    private val onErrorListener = PLOnErrorListener { errorCode->
+    private val onErrorListener = PLOnErrorListener { errorCode ->
         when (errorCode) {
-           PLOnErrorListener.ERROR_CODE_IO_ERROR->{
-               //IO错误  服务器会自动重连
-               doVideoLog("PLOnErrorListener.ERROR_CODE_IO_ERROR")
-               return@PLOnErrorListener false
-           }
-           PLOnErrorListener.ERROR_CODE_OPEN_FAILED->{
-               //打开失败
-               doVideoLog("PLOnErrorListener.ERROR_CODE_OPEN_FAILED")
-           }
-           PLOnErrorListener.ERROR_CODE_SEEK_FAILED->{
-               //进度条定位到某一具体位置失败
-               doVideoLog("PLOnErrorListener.ERROR_CODE_SEEK_FAILED")
-               return@PLOnErrorListener true
-           }
-           PLOnErrorListener.ERROR_CODE_CACHE_FAILED->{
-               //缓冲失败
-               doVideoLog("PLOnErrorListener.ERROR_CODE_CACHE_FAILED")
-           }
-           PLOnErrorListener.MEDIA_ERROR_UNKNOWN->{
-               //未知错误
-               doVideoLog("PLOnErrorListener.MEDIA_ERROR_UNKNOWN")
-           }
+            PLOnErrorListener.ERROR_CODE_IO_ERROR -> {
+                //IO错误  服务器会自动重连
+                doVideoLog("PLOnErrorListener.ERROR_CODE_IO_ERROR")
+                return@PLOnErrorListener false
+            }
+            PLOnErrorListener.ERROR_CODE_OPEN_FAILED -> {
+                //打开失败
+                doVideoLog("PLOnErrorListener.ERROR_CODE_OPEN_FAILED")
+            }
+            PLOnErrorListener.ERROR_CODE_SEEK_FAILED -> {
+                //进度条定位到某一具体位置失败
+                doVideoLog("PLOnErrorListener.ERROR_CODE_SEEK_FAILED")
+                return@PLOnErrorListener true
+            }
+            PLOnErrorListener.ERROR_CODE_CACHE_FAILED -> {
+                //缓冲失败
+                doVideoLog("PLOnErrorListener.ERROR_CODE_CACHE_FAILED")
+            }
+            PLOnErrorListener.MEDIA_ERROR_UNKNOWN -> {
+                //未知错误
+                doVideoLog("PLOnErrorListener.MEDIA_ERROR_UNKNOWN")
+            }
         }
         true
     }
@@ -172,4 +204,55 @@ class VideoFragment : BaseFragment() {
         }
     }
 
+    private val onClickListener = View.OnClickListener { view ->
+        when (view?.id) {
+            R.id.play_pause_iv -> {
+                val playing = pl_video_view.isPlaying
+                if (playing) {
+                    pl_video_view.pause()
+                } else {
+                    pl_video_view.start()
+                }
+                inPlayState = !playing
+                setPlayPauseIvBg(playing)
+
+                doVideoLog("duration:${CdTimeUtil.generateTime(pl_video_view.duration)}")
+            }
+            else -> {
+            }
+        }
+    }
+
+    private fun changeVideoStateWhenOnHiddenChanged(hidden: Boolean) {
+        if (hidden) {
+            if (inPlayState) {
+                if (pl_video_view != null) {
+                    pl_video_view.pause()
+                }
+                setPlayPauseIvBg(true)
+            }
+        } else {
+            if (inPlayState) {
+                if (pl_video_view != null) {
+                    pl_video_view.start()
+                }
+            } else {
+                if (pl_video_view != null) {
+                    pl_video_view.pause()
+                }
+            }
+            setPlayPauseIvBg(!inPlayState)
+        }
+    }
+
+    private fun setPlayPauseIvBg(playing: Boolean) {
+        val resId = if (playing) {
+            //暂停状态
+            R.drawable.ic_baseline_play_arrow_24
+        } else {
+            //播放状态
+            R.drawable.ic_baseline_pause_24
+        }
+        play_pause_iv.setImageResource(resId)
+    }
 }

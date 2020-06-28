@@ -53,6 +53,11 @@ android {
 
     /*设置资源前缀*/
     resourcePrefix "video_"
+
+    compileOptions {
+        sourceCompatibility = rootProject.ext.sourceCompatibility
+        targetCompatibility = rootProject.ext.targetCompatibility
+    }
 }
 
 dependencies {
@@ -63,12 +68,19 @@ dependencies {
     implementation deps.coreKtx
     implementation deps.constraintLayout
     implementation deps.legacySupportV4
+
     implementation deps.arouterApi
-    implementation files('libs/pldroid-player-2.1.9.jar')
     kapt deps.arouterCompiler
+
+    implementation deps.rxJava
+    implementation deps.rxAndroid
+
+    implementation files('libs/pldroid-player-2.1.9.jar')
+
     testImplementation deps.junit
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore
+
     implementation project(path: ':common')
     implementation project(path: ':view')
 }

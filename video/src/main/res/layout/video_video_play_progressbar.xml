@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/video_dp_30"
+    android:background="@color/video_semi_transparent"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingEnd="@dimen/video_dp_15"
+    android:paddingStart="@dimen/video_dp_15">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/media_start_time_tv"
+        android:layout_width="@dimen/video_dp_60"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/video_time_value"
+        android:textColor="@android:color/white"/>
+
+    <ProgressBar
+        android:id="@+id/media_progress_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        style="?android:progressBarStyleHorizontal"
+        android:layout_weight="4"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/media_end_time_tv"
+        android:layout_width="@dimen/video_dp_60"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginEnd="@dimen/video_dp_15"
+        android:text="@string/video_time_value"
+        android:textColor="@android:color/white"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/media_zoom_iv"
+        android:layout_width="@dimen/video_dp_25"
+        android:layout_height="@dimen/video_dp_25"
+        android:src="@drawable/ic_baseline_crop_free_24" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>
