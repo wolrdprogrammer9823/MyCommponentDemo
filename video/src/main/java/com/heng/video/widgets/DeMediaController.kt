@@ -1,11 +1,9 @@
 package com.heng.video.widgets
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.TypedArray
+import android.media.AudioManager
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -13,7 +11,6 @@ import android.widget.FrameLayout
 import android.widget.PopupWindow
 import android.widget.SeekBar
 import androidx.appcompat.widget.LinearLayoutCompat
-import com.heng.common.CommonConstant
 import com.heng.common.log.doVideoLog
 import com.heng.common.util.CdTimeUtil
 import com.heng.video.R
@@ -21,9 +18,6 @@ import com.heng.video.interfaces.ICommunication
 import com.pili.pldroid.player.IMediaController
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Consumer
-import io.reactivex.functions.Function
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.video_video_play_progressbar.view.*
 import java.util.concurrent.TimeUnit
@@ -37,7 +31,13 @@ class DeMediaController : FrameLayout, IMediaController {
     private var mPopupWindow: PopupWindow? = null
     private var mICommunication: ICommunication? = null
 
+    private var audioManager: AudioManager? = null
+
     private var mVideoPlayed = false
+    private var mInstantSeeking = true
+    private var updateProgressPerSecond = false
+
+    private var mDuration = 0L
 
     constructor(
         context: Context,
@@ -79,26 +79,18 @@ class DeMediaController : FrameLayout, IMediaController {
         doVideoLog(TAG,"duration:" + this.mediaPlayerControl!!.duration)
     }
 
-    @SuppressLint("CheckResult")
     override fun show() {
         doVideoLog( TAG,"show()")
         if (mVideoPlayed || mediaPlayerControl!!.isPlaying) {
             showPopupWindow()
         }
 
-        setProgress()
-
-        Observable.interval(0, 50, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-            .takeWhile {
-                mediaPlayerControl != null && mediaPlayerControl!!.isPlaying
-            }.subscribe {
-                setProgress()
-            }
+        showProgressValue()
     }
 
     override fun show(i: Int) {
-
         doVideoLog(TAG,"show(int i)")
+        showPopupWindow(i.toLong())
     }
 
     override fun hide() {
@@ -123,16 +115,13 @@ class DeMediaController : FrameLayout, IMediaController {
             mICommunication?.navigationToActivity()
         }
 
-        if (media_progress_bar != null) {
-            if (media_progress_bar is SeekBar) {
+        doVideoLog(TAG, "(media_seek_bar != null)->${media_seek_bar != null}")
+        if (media_seek_bar != null) {
 
-                val mSeekBar : SeekBar = media_progress_bar as SeekBar
-                mSeekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
-                mSeekBar.thumbOffset = 1
-            }
-
-            media_progress_bar.max = 100
-            media_progress_bar.isEnabled = true
+            media_seek_bar.setOnSeekBarChangeListener(onSeekBarChangeListener)
+            media_seek_bar.thumbOffset = 1
+            media_seek_bar.max = 100
+            media_seek_bar.isEnabled = true
         }
     }
 
@@ -150,6 +139,8 @@ class DeMediaController : FrameLayout, IMediaController {
     private fun init(context: Context) {
 
         mContentView = LayoutInflater.from(context).inflate(R.layout.video_video_play_progressbar, this)
+
+        audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
 
         mPopupWindow = PopupWindow(context)
         mPopupWindow?.contentView = mContentView
@@ -194,6 +185,19 @@ class DeMediaController : FrameLayout, IMediaController {
         }
     }
 
+    @SuppressLint("CheckResult")
+    private fun showProgressValue() {
+
+        setProgress()
+
+        Observable.interval(0, 50, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+            .takeWhile {
+                mediaPlayerControl != null && mediaPlayerControl!!.isPlaying && updateProgressPerSecond
+            }.subscribe {
+                setProgress()
+            }
+    }
+
     private fun setProgress(): Long {
 
         if (mediaPlayerControl == null) {
@@ -210,15 +214,17 @@ class DeMediaController : FrameLayout, IMediaController {
         doVideoLog("TAG","currentPosition->$currentPosition")
         val duration : Long? = mediaPlayerControl?.duration
         doVideoLog("TAG","duration->$duration")
-        if (media_progress_bar != null) {
+        if (media_seek_bar != null) {
             if (currentPosition!! > 0L) {
-                val position = currentPosition.times(100F).div(duration!!).plus(0.5F)
+                val position = currentPosition.times(1.0F).div(duration!!)
                 doVideoLog("TAG","position->${position.toInt()}")
-                media_progress_bar.setProgress(position.toInt(), false)
+                media_seek_bar.setProgress(position.times(100F).toInt(), false)
             }
-            val percent = mediaPlayerControl?.bufferPercentage
-            media_progress_bar.secondaryProgress = percent!!.toInt().times(10)
+            //val percent = mediaPlayerControl?.bufferPercentage
+            //media_progress_bar.secondaryProgress = percent!!.toInt().times(10)
         }
+
+        mDuration = duration!!
 
         if (media_start_time_tv != null) {
             media_start_time_tv.text = CdTimeUtil.generateTime(currentPosition!!)
@@ -232,16 +238,59 @@ class DeMediaController : FrameLayout, IMediaController {
     }
 
     private val onSeekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-
-        }
-
         override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
+            show(60 * 60 * 1000)
+            audioManager?.adjustStreamVolume(
+                AudioManager.STREAM_MUSIC,
+                AudioManager.ADJUST_SAME,
+                AudioManager.FLAG_PLAY_SOUND
+            )
+            updateProgressPerSecond = false
         }
 
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+        @SuppressLint("CheckResult")
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            if (!fromUser) {
+                return
+            }
 
+            val newPosition = mDuration.times(progress.div(100F)).toLong()
+            val newStartTime = CdTimeUtil.generateTime(newPosition)
+            if (media_start_time_tv != null) {
+                media_start_time_tv.text = newStartTime
+            }
+
+            Observable.interval(0, 200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                .takeWhile {
+                    mInstantSeeking
+                }.subscribe {
+                    mediaPlayerControl!!.seekTo(newPosition)
+                    doVideoLog("TAG-newPosition","newPosition->$newPosition")
+                    mInstantSeeking = false
+                }
+        }
+
+        @SuppressLint("CheckResult")
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            if (!mInstantSeeking) {
+                seekBar?.progress?.div(100F)?.times(mDuration)?.let { mediaPlayerControl!!.seekTo(it.toLong()) }
+            }
+
+            showPopupWindow(DEFAULT_SHOW_TIME)
+
+            updateProgressPerSecond = true
+
+            audioManager?.adjustStreamVolume(
+                AudioManager.STREAM_MUSIC,
+                AudioManager.ADJUST_SAME,
+                AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE
+            )
+
+            Observable.timer(1000, TimeUnit.MILLISECONDS).subscribe {
+                showProgressValue()
+            }
+
+            mInstantSeeking = true
         }
     }
 }

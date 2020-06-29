@@ -17,8 +17,8 @@
         android:text="@string/video_time_value"
         android:textColor="@android:color/white"/>
 
-    <ProgressBar
-        android:id="@+id/media_progress_bar"
+    <SeekBar
+        android:id="@+id/media_seek_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         style="?android:progressBarStyleHorizontal"

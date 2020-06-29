@@ -184,7 +184,9 @@ public class MediaController extends FrameLayout implements IMediaController {
         }
 
         mProgress = (ProgressBar) v.findViewById(MEDIACONTROLLER_PROGRESS_ID);
+        Log.d(TAG, "(mProgress != null)->" + (mProgress != null));
         if (mProgress != null) {
+            Log.d(TAG, "(mProgress instanceof SeekBar)->" + (mProgress instanceof SeekBar));
             if (mProgress instanceof SeekBar) {
                 SeekBar seeker = (SeekBar) mProgress;
                 seeker.setOnSeekBarChangeListener(mSeekListener);

@@ -27,5 +27,4 @@
             android:src="@drawable/ic_baseline_play_arrow_24"
             android:layout_gravity="center"/>
     </com.pili.pldroid.player.widget.PLVideoView>
-`
 </FrameLayout>
