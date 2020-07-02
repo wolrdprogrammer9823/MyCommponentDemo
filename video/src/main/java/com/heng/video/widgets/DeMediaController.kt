@@ -11,6 +11,7 @@ import android.widget.FrameLayout
 import android.widget.PopupWindow
 import android.widget.SeekBar
 import androidx.appcompat.widget.LinearLayoutCompat
+import com.heng.common.log.VIDEO_ZOOM_IN
 import com.heng.common.log.doVideoLog
 import com.heng.common.util.CdTimeUtil
 import com.heng.video.R
@@ -28,16 +29,18 @@ class DeMediaController : FrameLayout, IMediaController {
 
     private var mRootView: View? = null
     private var mContentView: View? = null
-    private var mPopupWindow: PopupWindow? = null
     private var mICommunication: ICommunication? = null
-
     private var audioManager: AudioManager? = null
+
+    var mPopupWindow: PopupWindow? = null
 
     private var mVideoPlayed = false
     private var mInstantSeeking = true
-    private var updateProgressPerSecond = false
+    private var updateProgressPerSecond = true
 
     private var mDuration = 0L
+
+    var mScreenState = VIDEO_ZOOM_IN
 
     constructor(
         context: Context,
@@ -112,7 +115,7 @@ class DeMediaController : FrameLayout, IMediaController {
     override fun setAnchorView(view: View) {
         doVideoLog(TAG,"setAnchorView(View view):${view != null}")
         media_zoom_iv.setOnClickListener {
-            mICommunication?.navigationToActivity()
+            mICommunication?.navigationToActivity(mScreenState)
         }
 
         doVideoLog(TAG, "(media_seek_bar != null)->${media_seek_bar != null}")
@@ -171,6 +174,9 @@ class DeMediaController : FrameLayout, IMediaController {
         Observable.timer(showTime, TimeUnit.MILLISECONDS)
             .subscribeOn(Schedulers.single())
             .observeOn(AndroidSchedulers.mainThread())
+            .doOnError {
+                println(it.cause!!.message)
+            }
             .subscribe {
                 hidePopupWindow()
             }
@@ -217,7 +223,7 @@ class DeMediaController : FrameLayout, IMediaController {
         if (media_seek_bar != null) {
             if (currentPosition!! > 0L) {
                 val position = currentPosition.times(1.0F).div(duration!!)
-                doVideoLog("TAG","position->${position.toInt()}")
+                doVideoLog("TAG","position->${position.times(100F).toInt()}")
                 media_seek_bar.setProgress(position.times(100F).toInt(), false)
             }
             //val percent = mediaPlayerControl?.bufferPercentage
@@ -260,21 +266,25 @@ class DeMediaController : FrameLayout, IMediaController {
                 media_start_time_tv.text = newStartTime
             }
 
-            Observable.interval(0, 200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                .takeWhile {
-                    mInstantSeeking
-                }.subscribe {
-                    mediaPlayerControl!!.seekTo(newPosition)
-                    doVideoLog("TAG-newPosition","newPosition->$newPosition")
-                    mInstantSeeking = false
-                }
+//            Observable.interval(0, 200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+//                .takeWhile {
+//                    mInstantSeeking
+//                }.subscribe {
+//                    mediaPlayerControl!!.seekTo(newPosition)
+//                    doVideoLog("TAG-newPosition","newPosition->$newPosition")
+//                    mInstantSeeking = false
+//                }
+
+            Observable.fromCallable {
+                mediaPlayerControl!!.seekTo(newPosition)
+            }.observeOn(AndroidSchedulers.mainThread()).subscribe()
         }
 
         @SuppressLint("CheckResult")
         override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            if (!mInstantSeeking) {
-                seekBar?.progress?.div(100F)?.times(mDuration)?.let { mediaPlayerControl!!.seekTo(it.toLong()) }
-            }
+//            if (!mInstantSeeking) {
+//                seekBar?.progress?.div(100F)?.times(mDuration)?.let { mediaPlayerControl!!.seekTo(it.toLong()) }
+//            }
 
             showPopupWindow(DEFAULT_SHOW_TIME)
 
@@ -290,7 +300,33 @@ class DeMediaController : FrameLayout, IMediaController {
                 showProgressValue()
             }
 
-            mInstantSeeking = true
+//            mInstantSeeking = true
+        }
+    }
+
+    @SuppressLint("CheckResult")
+    fun seekToPosition(position: Long) {
+
+        if (position < 0) {
+            doVideoLog("position must more than zero!!!")
+            return
+        }
+
+        mediaPlayerControl?.let {
+            Observable.fromCallable {
+                it.seekTo(position)
+            }.observeOn(AndroidSchedulers.mainThread()).subscribe()
+        }
+
+        if (position > 0L) {
+            mediaPlayerControl?.let {
+                val newPosition = position.times(1.0F).div(it.duration)
+                media_seek_bar.setProgress(newPosition.times(100F).toInt(), false)
+            }
+        }
+
+        if (media_start_time_tv != null) {
+            media_start_time_tv.text = CdTimeUtil.generateTime(position)
         }
     }
 }

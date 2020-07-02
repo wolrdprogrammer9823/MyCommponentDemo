@@ -1,13 +1,9 @@
 package com.heng.video
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import com.alibaba.android.arouter.launcher.ARouter
-import com.heng.common.CommonConstant
 import com.heng.common.base.BaseFragment
-import com.heng.common.log.VIDEO_CURRENT_POSITION
-import com.heng.common.log.VIDEO_IS_PLAYED
-import com.heng.common.log.VIDEO_PATH
-import com.heng.common.log.doVideoLog
+import com.heng.common.log.*
 import com.heng.common.util.CdTimeUtil
 import com.heng.video.interfaces.ICommunication
 import com.heng.video.widgets.DeMediaController
@@ -27,9 +23,10 @@ class VideoFragment : BaseFragment(), ICommunication {
     private var param1: String? = null
     private var param2: String? = null
 
-    private var mediaController: MediaController? = null
+    private lateinit var mediaController: DeMediaController
 
     private var inPlayState = false
+    private var videoNotScaled = true
     private var mDisplayAspectRatio = PLVideoView.ASPECT_RATIO_FIT_PARENT
 
     companion object {
@@ -88,7 +85,11 @@ class VideoFragment : BaseFragment(), ICommunication {
 //        mediaController?.setOnClickSpeedAdjustListener(onClickSpeedAdjustListener)
 //        pl_video_view.setMediaController(mediaController)
 
-        pl_video_view.setMediaController(DeMediaController(requireContext(), pl_video_view, this))
+        mediaController = DeMediaController(requireContext(), pl_video_view, this)
+        mediaController.mScreenState = VIDEO_ZOOM_OUT
+        pl_video_view.setMediaController(mediaController)
+
+        //可以使用两个PLVideoView横竖屏切换时轮流播放   而不是跳转activity
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
@@ -100,15 +101,19 @@ class VideoFragment : BaseFragment(), ICommunication {
 
     override fun onResume() {
         super.onResume()
-        if (pl_video_view != null && inPlayState) {
+        doVideoLog("override fun onResume()")
+        if (pl_video_view != null && inPlayState && videoNotScaled) {
             pl_video_view.start()
             setPlayPauseIvBg(false)
         }
+
+        videoNotScaled = true
     }
 
     override fun onPause() {
         super.onPause()
-        mediaController?.window?.dismiss()
+        doVideoLog("override fun onPause()")
+        mediaController.mPopupWindow?.dismiss()
         if (pl_video_view != null && pl_video_view.isPlaying) {
             pl_video_view.pause()
             setPlayPauseIvBg(true)
@@ -122,40 +127,84 @@ class VideoFragment : BaseFragment(), ICommunication {
         }
     }
 
-    override fun navigationToActivity() {
-        ARouter.getInstance()
-            .build(CommonConstant.TO_VIDEO_LANDSCAPE_ACTIVITY)
-            .withString(VIDEO_PATH, path)
-            .withLong(VIDEO_CURRENT_POSITION, pl_video_view.currentPosition)
-            .withBoolean(VIDEO_IS_PLAYED, pl_video_view.isPlaying)
-            .navigation()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        doVideoLog("requestCode:$requestCode,resultCode:$resultCode")
+        when (requestCode) {
+            VIDEO_PLAY_PAUSE_CODE -> {
+                if (resultCode == VIDEO_PLAY_PAUSE_CODE) {
+                    if (data == null || "".equals(data)) {
+                        doVideoLog("data == null || “”.equals(data)")
+                        return
+                    }
+                    val mVideoIsPlayed = data.getBooleanExtra(VIDEO_IS_PLAYED, false)
+                    val mVideoCurrentPosition = data.getLongExtra(VIDEO_CURRENT_POSITION, 0L)
+                    doVideoLog("mVideoIsPlayed:${mVideoIsPlayed}")
+
+                    if (mVideoIsPlayed) {
+                        pl_video_view.start()
+                        if (mVideoCurrentPosition != 0L) {
+                            mediaController.seekToPosition(mVideoCurrentPosition)
+                        }
+                        pl_video_view.start()
+                    } else {
+                        pl_video_view.pause()
+                    }
+                    setPlayPauseIvBg(!mVideoIsPlayed)
+                }
+            }
+            else -> {
+            }
+        }
+    }
+
+    override fun navigationToActivity(flag : Int) {
+//        ARouter.getInstance()
+//            .build(CommonConstant.TO_VIDEO_LANDSCAPE_ACTIVITY)
+//            .withString(VIDEO_PATH, path)
+//            .withLong(VIDEO_CURRENT_POSITION, pl_video_view.currentPosition)
+//            .withBoolean(VIDEO_IS_PLAYED, pl_video_view.isPlaying)
+//            .navigation(requireActivity(), VIDEO_PLAY_PAUSE_CODE)
+
+        when (flag) {
+            VIDEO_ZOOM_OUT -> {
+
+                val dataIntent = Intent(requireContext(), VideoLandscapeActivity::class.java)
+                dataIntent.putExtra(VIDEO_PATH, path)
+                dataIntent.putExtra(VIDEO_CURRENT_POSITION, pl_video_view!!.currentPosition)
+                dataIntent.putExtra(VIDEO_IS_PLAYED, pl_video_view!!.isPlaying)
+                startActivityForResult(dataIntent, VIDEO_PLAY_PAUSE_CODE)
+
+                videoNotScaled = false
+            }
+        }
     }
 
     //视频大小发生改变
     private val onVideoSizeChangedListener = PLOnVideoSizeChangedListener { width, height ->
-        doVideoLog("width:$width,height:$height")
+        doVideoLog("${VideoFragment::class.java.simpleName}:onVideoSizeChangedListener->width:$width,height:$height")
     }
 
     //视频帧率发生改变
     private val onVideoFrameListener =
         PLOnVideoFrameListener { data, size, width, height, format, ts ->
-            doVideoLog("data:${String(data)},size:$size,width:$width,height:$height,format:$format,ts:$ts")
+            doVideoLog("${VideoFragment::class.java.simpleName}:onVideoFrameListener->data:${String(data)},size:$size,width:$width,height:$height,format:$format,ts:$ts")
         }
 
     //音频帧率发生改变
     private val onAudioFrameListener =
         PLOnAudioFrameListener { data, size, sampleRate, channels, dataWidth, ts ->
-            doVideoLog("data:${String(data)},size:$size,sampleRate:$sampleRate,channels:$channels,dataWidth:$dataWidth,ts:$ts")
+            doVideoLog("${VideoFragment::class.java.simpleName}:onAudioFrameListener->data:${String(data)},size:$size,sampleRate:$sampleRate,channels:$channels,dataWidth:$dataWidth,ts:$ts")
         }
 
     //缓冲更新
     private val onBufferingUpdateListener = PLOnBufferingUpdateListener { percent ->
-        doVideoLog("percent:$percent")
+        doVideoLog("${VideoFragment::class.java.simpleName}:onBufferingUpdateListener->percent:$percent")
     }
 
     //视频播放完成监听
     private val onCompleteListener = PLOnCompletionListener {
-        doVideoLog("video is completed!!!")
+        doVideoLog("${VideoFragment::class.java.simpleName}:onCompleteListener->video is completed!!!")
         pl_video_view.pause()
         setPlayPauseIvBg(true)
     }
@@ -213,6 +262,7 @@ class VideoFragment : BaseFragment(), ICommunication {
                 } else {
                     pl_video_view.start()
                 }
+                videoNotScaled = true
                 inPlayState = !playing
                 setPlayPauseIvBg(playing)
 
@@ -253,6 +303,8 @@ class VideoFragment : BaseFragment(), ICommunication {
             //播放状态
             R.drawable.ic_baseline_pause_24
         }
-        play_pause_iv.setImageResource(resId)
+        if (play_pause_iv != null) {
+            play_pause_iv.setImageResource(resId)
+        }
     }
 }

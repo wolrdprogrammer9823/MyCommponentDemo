@@ -29,9 +29,11 @@
             android:id="@+id/landscape_zoom_iv"
             android:layout_width="@dimen/video_dp_25"
             android:layout_height="@dimen/video_dp_25"
-            android:src="@drawable/ic_baseline_crop_free_24"
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="@dimen/video_dp_15"
-            android:layout_marginBottom="@dimen/video_dp_15"/>
+            android:layout_marginBottom="@dimen/video_dp_15"
+            android:src="@drawable/ic_baseline_crop_free_24"
+            android:visibility="gone"
+            />
     </com.pili.pldroid.player.widget.PLVideoView>
 </FrameLayout>

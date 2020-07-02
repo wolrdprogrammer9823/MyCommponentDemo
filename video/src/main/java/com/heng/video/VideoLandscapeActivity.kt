@@ -1,22 +1,22 @@
 package com.heng.video
+import android.content.Intent
 import android.view.View
 import com.alibaba.android.arouter.facade.annotation.Autowired
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.alibaba.android.arouter.launcher.ARouter
 import com.heng.common.CommonConstant
 import com.heng.common.base.BaseActivity
-import com.heng.common.log.VIDEO_CURRENT_POSITION
-import com.heng.common.log.VIDEO_IS_PLAYED
-import com.heng.common.log.VIDEO_PATH
-import com.heng.common.log.doVideoLog
-import com.heng.video.widgets.MediaController
+import com.heng.common.log.*
+import com.heng.video.interfaces.ICommunication
+import com.heng.video.widgets.DeMediaController
 import com.pili.pldroid.player.AVOptions
+import com.pili.pldroid.player.PLOnCompletionListener
+import com.pili.pldroid.player.PLOnPreparedListener
 import kotlinx.android.synthetic.main.video_activity_video_landscape.*
-import kotlinx.android.synthetic.main.video_fragment_video.*
 
 
 @Route(path = CommonConstant.TO_VIDEO_LANDSCAPE_ACTIVITY)
-class VideoLandscapeActivity : BaseActivity() {
+class VideoLandscapeActivity : BaseActivity() , ICommunication{
 
     @JvmField
     @Autowired(name = VIDEO_PATH)
@@ -30,16 +30,25 @@ class VideoLandscapeActivity : BaseActivity() {
     @Autowired(name = VIDEO_IS_PLAYED)
     var videoIsPlayed = false
 
+    var mVideoPath : String? = null
+    var mVideoCurrentPosition = 0L
+    var mVideoIsPlayed = false
+
+    private lateinit  var mediaController: DeMediaController
+
     override fun getContentLayoutId(): Int = R.layout.video_activity_video_landscape
 
     override fun initWidget() {
         super.initWidget()
         ARouter.getInstance().inject(this)
         landscape_play_pause_iv.setOnClickListener(onClickListener)
+        landscape_zoom_iv.setOnClickListener(onClickListener)
     }
 
     override fun initData() {
         super.initData()
+
+        getIntentData()
 
         //设置封面view
         landscape_pl_video_view.setCoverView(landscape_cover_iv)
@@ -62,25 +71,19 @@ class VideoLandscapeActivity : BaseActivity() {
 //        pl_video_view.setOnErrorListener(onErrorListener)
 //        pl_video_view.setOnCompletionListener(onCompleteListener)
 
-        landscape_pl_video_view.setVideoPath(videoPath)
+        landscape_pl_video_view.setVideoPath(mVideoPath)
 
-        mediaController = MediaController(this, true, false, landscape_pl_video_view)
-//      mediaController?.setOnClickSpeedAdjustListener(onClickSpeedAdjustListener)
+//        mediaController = MediaController(this, true, false, landscape_pl_video_view)
+//        mediaController?.setOnClickSpeedAdjustListener(onClickSpeedAdjustListener)
+        landscape_pl_video_view.setOnPreparedListener(onPreparedListener)
+        landscape_pl_video_view.setOnCompletionListener(onCompletionListener)
 
+        mediaController = DeMediaController(this, landscape_pl_video_view, this)
+        mediaController.mScreenState = VIDEO_ZOOM_IN
         landscape_pl_video_view.setMediaController(mediaController)
 
-        doVideoLog(this.javaClass.simpleName,"videoPath:$videoPath")
+        doVideoLog(this.javaClass.simpleName,"videoPath:$mVideoPath")
         doVideoLog(this.javaClass.simpleName,"videoCurrentPosition:$videoCurrentPosition,videoIsPlayed:$videoIsPlayed")
-
-        if (videoIsPlayed) {
-
-            landscape_pl_video_view.start()
-            setPlayPauseIvBg(!videoIsPlayed)
-
-            if (videoCurrentPosition != 0L) {
-                mediaController?.seekToPosition(videoCurrentPosition)
-            }
-        }
     }
 
     override fun onPause() {
@@ -98,7 +101,41 @@ class VideoLandscapeActivity : BaseActivity() {
         }
     }
 
-    private var mediaController: MediaController? = null
+    override fun onBackPressed() {
+        setIntentData()
+        super.onBackPressed()
+        doVideoLog("override fun onBackPressed()")
+    }
+
+    override fun navigationToActivity(flag : Int) {
+        doVideoLog("override fun navigationToActivity(),flag->$flag")
+        when (flag) {
+            VIDEO_ZOOM_IN->{
+                setIntentData(true)
+            }
+        }
+    }
+
+    private fun getIntentData() {
+        mVideoPath = intent.getStringExtra(VIDEO_PATH)
+        mVideoCurrentPosition = intent.getLongExtra(VIDEO_CURRENT_POSITION, 0L)
+        mVideoIsPlayed = intent.getBooleanExtra(VIDEO_IS_PLAYED, false)
+    }
+
+    private fun setIntentData(finish: Boolean) {
+        val dataIntent = Intent()
+        dataIntent.putExtra(VIDEO_PATH, mVideoPath)
+        dataIntent.putExtra(VIDEO_CURRENT_POSITION, landscape_pl_video_view!!.currentPosition)
+        dataIntent.putExtra(VIDEO_IS_PLAYED, landscape_pl_video_view!!.isPlaying)
+        setResult(VIDEO_PLAY_PAUSE_CODE, dataIntent)
+        if (finish) {
+            finish()
+        }
+    }
+
+    private fun setIntentData() {
+        setIntentData(false)
+    }
 
     private val onClickListener = View.OnClickListener { view ->
         when (view.id) {
@@ -107,10 +144,19 @@ class VideoLandscapeActivity : BaseActivity() {
                     landscape_pl_video_view.pause()
                 } else {
                     landscape_pl_video_view.start()
+                    if (mVideoCurrentPosition != 0L) {
+                        mediaController.seekToPosition(mVideoCurrentPosition)
+                    }
+                    landscape_pl_video_view.start()
                 }
+
                 setPlayPauseIvBg(!landscape_pl_video_view.isPlaying)
             }
+            R.id.landscape_zoom_iv -> {
+                setIntentData()
+            }
             else -> {
+
             }
         }
     }
@@ -126,4 +172,20 @@ class VideoLandscapeActivity : BaseActivity() {
         landscape_play_pause_iv.setImageResource(resId)
     }
 
+    private val onPreparedListener = PLOnPreparedListener{
+        if (mVideoIsPlayed) {
+
+            setPlayPauseIvBg(!mVideoIsPlayed)
+            landscape_pl_video_view.start()
+            if (mVideoCurrentPosition != 0L) {
+                mediaController.seekToPosition(mVideoCurrentPosition)
+            }
+            landscape_pl_video_view.start()
+        }
+    }
+
+    private val onCompletionListener = PLOnCompletionListener {
+        mVideoIsPlayed = false
+        setPlayPauseIvBg(true)
+    }
 }

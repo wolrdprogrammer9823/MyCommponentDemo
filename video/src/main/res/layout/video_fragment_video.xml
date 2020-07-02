@@ -27,4 +27,15 @@
             android:src="@drawable/ic_baseline_play_arrow_24"
             android:layout_gravity="center"/>
     </com.pili.pldroid.player.widget.PLVideoView>
+
+    <SeekBar
+        android:id="@+id/media_seek_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/darker_gray"
+        style="?android:progressBarStyleHorizontal"
+        android:visibility="gone"
+        android:layout_gravity="bottom"
+        android:max="100"
+        android:progress="100"/>
 </FrameLayout>
