@@ -1,7 +1,10 @@
 package com.heng.video
 import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
+import android.widget.FrameLayout
 import com.heng.common.base.BaseFragment
 import com.heng.common.log.*
 import com.heng.common.util.CdTimeUtil
@@ -26,7 +29,6 @@ class VideoFragment : BaseFragment(), ICommunication {
     private lateinit var mediaController: DeMediaController
 
     private var inPlayState = false
-    private var videoNotScaled = true
     private var mDisplayAspectRatio = PLVideoView.ASPECT_RATIO_FIT_PARENT
 
     companion object {
@@ -69,6 +71,7 @@ class VideoFragment : BaseFragment(), ICommunication {
         avOptions.setInteger(AVOptions.KEY_MEDIACODEC, AVOptions.MEDIA_CODEC_SW_DECODE)
         avOptions.setInteger(AVOptions.KEY_LIVE_STREAMING, 0)
         avOptions.setInteger(AVOptions.KEY_LOG_LEVEL, 0)
+
         pl_video_view.setAVOptions(avOptions)
 
         //设置相关的监听器
@@ -81,15 +84,12 @@ class VideoFragment : BaseFragment(), ICommunication {
 
         pl_video_view.setVideoPath(path)
 
-//        mediaController = MediaController(requireContext(), true, false, pl_video_view)
+//        val mediaController = MediaController(requireContext(), true, false, pl_video_view)
 //        mediaController?.setOnClickSpeedAdjustListener(onClickSpeedAdjustListener)
 //        pl_video_view.setMediaController(mediaController)
 
         mediaController = DeMediaController(requireContext(), pl_video_view, this)
-        mediaController.mScreenState = VIDEO_ZOOM_OUT
         pl_video_view.setMediaController(mediaController)
-
-        //可以使用两个PLVideoView横竖屏切换时轮流播放   而不是跳转activity
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
@@ -102,12 +102,10 @@ class VideoFragment : BaseFragment(), ICommunication {
     override fun onResume() {
         super.onResume()
         doVideoLog("override fun onResume()")
-        if (pl_video_view != null && inPlayState && videoNotScaled) {
+        if (pl_video_view != null && inPlayState) {
             pl_video_view.start()
             setPlayPauseIvBg(false)
         }
-
-        videoNotScaled = true
     }
 
     override fun onPause() {
@@ -125,6 +123,11 @@ class VideoFragment : BaseFragment(), ICommunication {
         if (pl_video_view != null) {
             pl_video_view.stopPlayback()
         }
+    }
+
+    override fun onBackPressed(): Boolean {
+        navigationToActivity(VIDEO_ZOOM_IN)
+        return resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -159,24 +162,38 @@ class VideoFragment : BaseFragment(), ICommunication {
     }
 
     override fun navigationToActivity(flag : Int) {
-//        ARouter.getInstance()
-//            .build(CommonConstant.TO_VIDEO_LANDSCAPE_ACTIVITY)
-//            .withString(VIDEO_PATH, path)
-//            .withLong(VIDEO_CURRENT_POSITION, pl_video_view.currentPosition)
-//            .withBoolean(VIDEO_IS_PLAYED, pl_video_view.isPlaying)
-//            .navigation(requireActivity(), VIDEO_PLAY_PAUSE_CODE)
-
         when (flag) {
             VIDEO_ZOOM_OUT -> {
 
-                val dataIntent = Intent(requireContext(), VideoLandscapeActivity::class.java)
-                dataIntent.putExtra(VIDEO_PATH, path)
-                dataIntent.putExtra(VIDEO_CURRENT_POSITION, pl_video_view!!.currentPosition)
-                dataIntent.putExtra(VIDEO_IS_PLAYED, pl_video_view!!.isPlaying)
-                startActivityForResult(dataIntent, VIDEO_PLAY_PAUSE_CODE)
+//                val dataIntent = Intent(requireContext(), VideoLandscapeActivity::class.java)
+//                dataIntent.putExtra(VIDEO_PATH, path)
+//                dataIntent.putExtra(VIDEO_CURRENT_POSITION, pl_video_view!!.currentPosition)
+//                dataIntent.putExtra(VIDEO_IS_PLAYED, pl_video_view!!.isPlaying)
+//                startActivityForResult(dataIntent, VIDEO_PLAY_PAUSE_CODE)
+//
+//                videoNotScaled = false
 
-                videoNotScaled = false
+                doVideoLog("${VideoFragment::class.java.simpleName}:VIDEO_ZOOM_OUT->$VIDEO_ZOOM_OUT")
+
+                val newLayoutParam = pl_video_view.layoutParams as FrameLayout.LayoutParams
+                newLayoutParam.width = FrameLayout.LayoutParams.MATCH_PARENT
+                newLayoutParam.height = FrameLayout.LayoutParams.MATCH_PARENT
+                pl_video_view.layoutParams = newLayoutParam
+
+                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
             }
+            VIDEO_ZOOM_IN -> {
+
+                doVideoLog("${VideoFragment::class.java.simpleName}:VIDEO_ZOOM_IN->$VIDEO_ZOOM_IN")
+
+                val newLayoutParam = pl_video_view.layoutParams as FrameLayout.LayoutParams
+                newLayoutParam.width = FrameLayout.LayoutParams.MATCH_PARENT
+                newLayoutParam.height = resources.getDimension(R.dimen.video_dp_300).toInt()
+                pl_video_view.layoutParams = newLayoutParam
+
+                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+            }
+            else -> {}
         }
     }
 
@@ -262,7 +279,7 @@ class VideoFragment : BaseFragment(), ICommunication {
                 } else {
                     pl_video_view.start()
                 }
-                videoNotScaled = true
+
                 inPlayState = !playing
                 setPlayPauseIvBg(playing)
 
@@ -303,8 +320,7 @@ class VideoFragment : BaseFragment(), ICommunication {
             //播放状态
             R.drawable.ic_baseline_pause_24
         }
-        if (play_pause_iv != null) {
-            play_pause_iv.setImageResource(resId)
-        }
+
+        play_pause_iv?.setImageResource(resId)
     }
 }

@@ -36,7 +36,6 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
         /*得到当前activity下的所有Fragment*/
         val fragments = supportFragmentManager.fragments
         fragments.let {
@@ -52,6 +51,8 @@ abstract class BaseActivity : AppCompatActivity() {
                 }
             }
         }
+        super.onBackPressed()
+        finish()
     }
 
     open fun setNavigationBarBgColor(@ColorRes colorRes: Int) {

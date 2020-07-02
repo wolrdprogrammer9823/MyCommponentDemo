@@ -1,6 +1,7 @@
 package com.heng.video.widgets
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.media.AudioManager
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -12,6 +13,7 @@ import android.widget.PopupWindow
 import android.widget.SeekBar
 import androidx.appcompat.widget.LinearLayoutCompat
 import com.heng.common.log.VIDEO_ZOOM_IN
+import com.heng.common.log.VIDEO_ZOOM_OUT
 import com.heng.common.log.doVideoLog
 import com.heng.common.util.CdTimeUtil
 import com.heng.video.R
@@ -27,11 +29,11 @@ class DeMediaController : FrameLayout, IMediaController {
 
     private var mediaPlayerControl: IMediaController.MediaPlayerControl? = null
 
-    private var mRootView: View? = null
     private var mContentView: View? = null
     private var mICommunication: ICommunication? = null
     private var audioManager: AudioManager? = null
 
+    var mRootView: View? = null
     var mPopupWindow: PopupWindow? = null
 
     private var mVideoPlayed = false
@@ -40,7 +42,7 @@ class DeMediaController : FrameLayout, IMediaController {
 
     private var mDuration = 0L
 
-    var mScreenState = VIDEO_ZOOM_IN
+    var mScreenState = VIDEO_ZOOM_OUT
 
     constructor(
         context: Context,
@@ -115,6 +117,9 @@ class DeMediaController : FrameLayout, IMediaController {
     override fun setAnchorView(view: View) {
         doVideoLog(TAG,"setAnchorView(View view):${view != null}")
         media_zoom_iv.setOnClickListener {
+            mScreenState = if (context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) VIDEO_ZOOM_OUT else VIDEO_ZOOM_IN
+            doVideoLog(TAG,"smScreenState:$mScreenState")
+            hidePopupWindow()
             mICommunication?.navigationToActivity(mScreenState)
         }
 
@@ -131,6 +136,11 @@ class DeMediaController : FrameLayout, IMediaController {
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         showPopupWindow()
         return true
+    }
+
+    override fun onTrackballEvent(event: MotionEvent?): Boolean {
+        showPopupWindow()
+        return false
     }
 
     companion object {

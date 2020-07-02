@@ -1,5 +1,7 @@
 package com.heng.main
+import android.content.res.Configuration
 import android.view.MenuItem
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.alibaba.android.arouter.facade.annotation.Route
@@ -23,6 +25,14 @@ class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelec
     }
 
     override fun getContentLayoutId(): Int = R.layout.main_activity_main
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (currentIndex == 1) {
+            navigation_view.visibility = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) View.GONE
+            else View.VISIBLE
+        }
+    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
