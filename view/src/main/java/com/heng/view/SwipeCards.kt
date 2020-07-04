@@ -140,7 +140,7 @@ class SwipeCards : ViewGroup {
     private fun animateToCenter(releaseView: View) {
         val left = mCenterX.minus(releaseView.width shr 1)
         val childIndex = indexOfChild(releaseView)
-        val top = mCenterY.minus(releaseView.height shr 1).plus(mCardGap.times(childCount - childIndex))
+        val top = mCenterY.minus(releaseView.height shr 1).plus(mCardGap.times(childCount - childIndex + dismissChildCount))
         viewDragHelper?.smoothSlideViewTo(releaseView, left, top)
         invalidate()
     }

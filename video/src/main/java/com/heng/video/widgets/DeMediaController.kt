@@ -21,6 +21,7 @@ import com.heng.video.interfaces.ICommunication
 import com.pili.pldroid.player.IMediaController
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.video_video_play_progressbar.view.*
 import java.util.concurrent.TimeUnit
@@ -41,10 +42,13 @@ class DeMediaController : FrameLayout, IMediaController {
     private var updateProgressPerSecond = true
 
     private var mDuration = 0L
+    private var currentTime = 0L
 
     var mScreenState = VIDEO_ZOOM_OUT
 
-    private var showProgressBar = false
+    private var showingProgressBar = false
+
+    private var disposable: Disposable? = null
 
     constructor(
         context: Context,
@@ -87,30 +91,42 @@ class DeMediaController : FrameLayout, IMediaController {
     }
 
     override fun show() {
-        doVideoLog( TAG,"show()")
-
+        doVideoLog(TAG,"show()")
         if (mVideoPlayed || mediaPlayerControl!!.isPlaying) {
 
-            showPopupWindow()
-            showProgressValue()
-        }
+            if (System.currentTimeMillis() - currentTime >= DEFAULT_SHOW_TIME) {
 
+                show(DEFAULT_SHOW_TIME)
+            } else {
+
+                mPopupWindow?.let {
+                    if (it.isShowing) {
+                        it.dismiss()
+                    }
+                }
+                disposable?.dispose()
+                show(DEFAULT_SHOW_TIME)
+            }
+
+            currentTime = System.currentTimeMillis()
+        }
     }
 
+    @SuppressLint("CheckResult")
     override fun show(i: Int) {
         doVideoLog(TAG,"show(int i)")
-        showPopupWindow(i.toLong())
+        showPopupWindow(i)
+        showProgressValue()
     }
 
     override fun hide() {
-
         doVideoLog(TAG,"hide()")
+        //按HOME键或者最近任务键会调用该方法
     }
 
     override fun isShowing(): Boolean {
-
         doVideoLog(TAG, "isShowing()")
-        return showProgressBar
+        return showingProgressBar
     }
 
     override fun setEnabled(b: Boolean) {
@@ -138,18 +154,18 @@ class DeMediaController : FrameLayout, IMediaController {
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        showPopupWindow()
+        showPopupWindow(DEFAULT_SHOW_TIME)
         return true
     }
 
     override fun onTrackballEvent(event: MotionEvent?): Boolean {
-        showPopupWindow()
+        showPopupWindow(DEFAULT_SHOW_TIME)
         return false
     }
 
     companion object {
 
-        private const val DEFAULT_SHOW_TIME = 3000L
+        private const val DEFAULT_SHOW_TIME = 3000
         private const val TAG = "DeMediaController"
     }
 
@@ -176,7 +192,7 @@ class DeMediaController : FrameLayout, IMediaController {
     }
 
     @SuppressLint("CheckResult")
-    private fun showPopupWindow(showTime: Long) {
+    private fun showPopupWindow(showTime: Int) {
 
         doVideoLog(TAG,"mPopupWindow=${mPopupWindow != null}")
         doVideoLog(TAG,"mRootView=${mRootView != null}")
@@ -189,7 +205,7 @@ class DeMediaController : FrameLayout, IMediaController {
             mPopupWindow?.showAsDropDown(mRootView!!, 0, -mPopupWindow!!.height)
         } catch (e: Exception) {}
 
-        Observable.timer(showTime, TimeUnit.MILLISECONDS)
+        disposable = Observable.timer(showTime.toLong(), TimeUnit.MILLISECONDS)
             .subscribeOn(Schedulers.single())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnError {
@@ -200,10 +216,12 @@ class DeMediaController : FrameLayout, IMediaController {
             }
     }
 
-    private fun hidePopupWindow() {
+    fun hidePopupWindow() {
         mPopupWindow?.let {
             if (it.isShowing) {
-                it.dismiss()
+                try {
+                    it.dismiss()
+                } catch (e: NullPointerException) {}
             }
         }
     }
@@ -271,6 +289,8 @@ class DeMediaController : FrameLayout, IMediaController {
 
             dismissProgressBar = false
             updateProgressPerSecond = false
+
+            showPopupWindow(DEFAULT_SHOW_TIME)
         }
 
         @SuppressLint("CheckResult")
@@ -292,8 +312,6 @@ class DeMediaController : FrameLayout, IMediaController {
             dismissProgressBar = true
             updateProgressPerSecond = true
 
-            showPopupWindow(DEFAULT_SHOW_TIME)
-
             audioManager?.adjustStreamVolume(
                 AudioManager.STREAM_MUSIC,
                 AudioManager.ADJUST_SAME,
@@ -306,7 +324,7 @@ class DeMediaController : FrameLayout, IMediaController {
                 mediaPlayerControl!!.seekTo(newPosition)
             }.observeOn(AndroidSchedulers.mainThread()).subscribe()
 
-            Observable.just(1).subscribe { showProgressValue() }
+            showProgressValue()
         }
     }
 

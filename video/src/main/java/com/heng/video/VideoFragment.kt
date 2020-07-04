@@ -190,6 +190,8 @@ class VideoFragment : BaseFragment(), ICommunication {
 
                 doVideoLog("${VideoFragment::class.java.simpleName}:VIDEO_ZOOM_IN->$VIDEO_ZOOM_IN")
 
+                mediaController.hidePopupWindow()
+
                 val newLayoutParam = pl_video_view.layoutParams as FrameLayout.LayoutParams
                 newLayoutParam.width = FrameLayout.LayoutParams.MATCH_PARENT
                 newLayoutParam.height = resources.getDimension(R.dimen.video_dp_300).toInt()
