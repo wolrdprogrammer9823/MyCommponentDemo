@@ -30,19 +30,21 @@ class DeMediaController : FrameLayout, IMediaController {
     private var mediaPlayerControl: IMediaController.MediaPlayerControl? = null
 
     private var mContentView: View? = null
-    private var mICommunication: ICommunication? = null
     private var audioManager: AudioManager? = null
+    private var mICommunication: ICommunication? = null
 
     var mRootView: View? = null
     var mPopupWindow: PopupWindow? = null
 
     private var mVideoPlayed = false
-    private var mInstantSeeking = true
+    private var dismissProgressBar = true
     private var updateProgressPerSecond = true
 
     private var mDuration = 0L
 
     var mScreenState = VIDEO_ZOOM_OUT
+
+    private var showProgressBar = false
 
     constructor(
         context: Context,
@@ -86,11 +88,13 @@ class DeMediaController : FrameLayout, IMediaController {
 
     override fun show() {
         doVideoLog( TAG,"show()")
+
         if (mVideoPlayed || mediaPlayerControl!!.isPlaying) {
+
             showPopupWindow()
+            showProgressValue()
         }
 
-        showProgressValue()
     }
 
     override fun show(i: Int) {
@@ -106,7 +110,7 @@ class DeMediaController : FrameLayout, IMediaController {
     override fun isShowing(): Boolean {
 
         doVideoLog(TAG, "isShowing()")
-        return false
+        return showProgressBar
     }
 
     override fun setEnabled(b: Boolean) {
@@ -179,18 +183,21 @@ class DeMediaController : FrameLayout, IMediaController {
         doVideoLog(TAG,"mRootView=${mRootView?.height}")
         doVideoLog(TAG,"mContentView=${mContentView?.height}")
 
-        mPopupWindow?.showAsDropDown(mRootView!!, 0, -mPopupWindow!!.height)
+        try {
+            //try-catch住 有时会报The specified child already has a parent.
+            // You must call removeView() on the child's parent first.错误
+            mPopupWindow?.showAsDropDown(mRootView!!, 0, -mPopupWindow!!.height)
+        } catch (e: Exception) {}
 
         Observable.timer(showTime, TimeUnit.MILLISECONDS)
             .subscribeOn(Schedulers.single())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnError {
                 println(it.cause!!.message)
-            }
+            }.takeWhile { dismissProgressBar }
             .subscribe {
                 hidePopupWindow()
             }
-
     }
 
     private fun hidePopupWindow() {
@@ -232,9 +239,9 @@ class DeMediaController : FrameLayout, IMediaController {
         doVideoLog("TAG","duration->$duration")
         if (media_seek_bar != null) {
             if (currentPosition!! > 0L) {
-                val position = currentPosition.times(1.0F).div(duration!!)
+                val position = currentPosition.times(100F).div(duration!!).plus(0.5F)
                 doVideoLog("TAG","position->${position.times(100F).toInt()}")
-                media_seek_bar.setProgress(position.times(100F).toInt(), false)
+                media_seek_bar.setProgress(position.toInt(), false)
             }
             //val percent = mediaPlayerControl?.bufferPercentage
             //media_progress_bar.secondaryProgress = percent!!.toInt().times(10)
@@ -247,7 +254,7 @@ class DeMediaController : FrameLayout, IMediaController {
         }
 
         if (media_end_time_tv != null) {
-            media_end_time_tv.text = CdTimeUtil.generateTime(duration!!)
+            media_end_time_tv.text = CdTimeUtil.generateTime(duration)
         }
 
         return currentPosition!!.toLong()
@@ -255,12 +262,14 @@ class DeMediaController : FrameLayout, IMediaController {
 
     private val onSeekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
         override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            show(60 * 60 * 1000)
+
             audioManager?.adjustStreamVolume(
                 AudioManager.STREAM_MUSIC,
                 AudioManager.ADJUST_SAME,
                 AudioManager.FLAG_PLAY_SOUND
             )
+
+            dismissProgressBar = false
             updateProgressPerSecond = false
         }
 
@@ -275,30 +284,15 @@ class DeMediaController : FrameLayout, IMediaController {
             if (media_start_time_tv != null) {
                 media_start_time_tv.text = newStartTime
             }
-
-//            Observable.interval(0, 200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-//                .takeWhile {
-//                    mInstantSeeking
-//                }.subscribe {
-//                    mediaPlayerControl!!.seekTo(newPosition)
-//                    doVideoLog("TAG-newPosition","newPosition->$newPosition")
-//                    mInstantSeeking = false
-//                }
-
-            Observable.fromCallable {
-                mediaPlayerControl!!.seekTo(newPosition)
-            }.observeOn(AndroidSchedulers.mainThread()).subscribe()
         }
 
         @SuppressLint("CheckResult")
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-//            if (!mInstantSeeking) {
-//                seekBar?.progress?.div(100F)?.times(mDuration)?.let { mediaPlayerControl!!.seekTo(it.toLong()) }
-//            }
+        override fun onStopTrackingTouch(seekBar: SeekBar) {
+
+            dismissProgressBar = true
+            updateProgressPerSecond = true
 
             showPopupWindow(DEFAULT_SHOW_TIME)
-
-            updateProgressPerSecond = true
 
             audioManager?.adjustStreamVolume(
                 AudioManager.STREAM_MUSIC,
@@ -306,11 +300,13 @@ class DeMediaController : FrameLayout, IMediaController {
                 AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE
             )
 
-            Observable.timer(1000, TimeUnit.MILLISECONDS).subscribe {
-                showProgressValue()
-            }
+            val newPosition = mDuration.times(seekBar.progress.div(100F)).toLong()
 
-//            mInstantSeeking = true
+            Observable.fromCallable {
+                mediaPlayerControl!!.seekTo(newPosition)
+            }.observeOn(AndroidSchedulers.mainThread()).subscribe()
+
+            Observable.just(1).subscribe { showProgressValue() }
         }
     }
 

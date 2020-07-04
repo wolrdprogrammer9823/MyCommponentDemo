@@ -8,7 +8,7 @@
     android:background="@android:color/white"
     tools:context=".VideoFragment">
 
-    <com.pili.pldroid.player.widget.PLVideoView
+    <com.heng.video.widgets.DefinePLVideoView
         android:id="@+id/pl_video_view"
         android:layout_width="match_parent"
         android:layout_height="@dimen/video_dp_300"
@@ -17,7 +17,7 @@
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/cover_iv"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/video_dp_400"
+            android:layout_height="@dimen/video_dp_300"
             android:src="@drawable/thumbnail"/>
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -26,10 +26,10 @@
             android:layout_height="@dimen/video_dp_45"
             android:src="@drawable/ic_baseline_play_arrow_24"
             android:layout_gravity="center"/>
-    </com.pili.pldroid.player.widget.PLVideoView>
+    </com.heng.video.widgets.DefinePLVideoView>
 
     <SeekBar
-        android:id="@+id/media_seek_bar"
+        android:id="@+id/test_media_seek_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/darker_gray"

@@ -5,6 +5,8 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
 import com.heng.common.base.BaseFragment
 import com.heng.common.log.*
 import com.heng.common.util.CdTimeUtil
@@ -90,6 +92,8 @@ class VideoFragment : BaseFragment(), ICommunication {
 
         mediaController = DeMediaController(requireContext(), pl_video_view, this)
         pl_video_view.setMediaController(mediaController)
+
+        test_media_seek_bar.setOnSeekBarChangeListener(mSeekListener)
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
@@ -165,13 +169,13 @@ class VideoFragment : BaseFragment(), ICommunication {
         when (flag) {
             VIDEO_ZOOM_OUT -> {
 
-//                val dataIntent = Intent(requireContext(), VideoLandscapeActivity::class.java)
-//                dataIntent.putExtra(VIDEO_PATH, path)
-//                dataIntent.putExtra(VIDEO_CURRENT_POSITION, pl_video_view!!.currentPosition)
-//                dataIntent.putExtra(VIDEO_IS_PLAYED, pl_video_view!!.isPlaying)
-//                startActivityForResult(dataIntent, VIDEO_PLAY_PAUSE_CODE)
-//
-//                videoNotScaled = false
+                //val dataIntent = Intent(requireContext(), VideoLandscapeActivity::class.java)
+                //dataIntent.putExtra(VIDEO_PATH, path)
+                //dataIntent.putExtra(VIDEO_CURRENT_POSITION, pl_video_view!!.currentPosition)
+                //dataIntent.putExtra(VIDEO_IS_PLAYED, pl_video_view!!.isPlaying)
+                //startActivityForResult(dataIntent, VIDEO_PLAY_PAUSE_CODE)
+
+                //videoNotScaled = false
 
                 doVideoLog("${VideoFragment::class.java.simpleName}:VIDEO_ZOOM_OUT->$VIDEO_ZOOM_OUT")
 
@@ -322,5 +326,26 @@ class VideoFragment : BaseFragment(), ICommunication {
         }
 
         play_pause_iv?.setImageResource(resId)
+    }
+
+
+    private val mSeekListener = object : OnSeekBarChangeListener {
+        override fun onStartTrackingTouch(bar: SeekBar) {
+
+            doVideoLog("${VideoFragment::class.java.simpleName}:onStartTrackingTouch")
+        }
+
+        override fun onProgressChanged(bar: SeekBar, progress: Int, fromuser: Boolean) {
+            if (!fromuser) {
+                return
+            }
+
+            doVideoLog("${VideoFragment::class.java.simpleName}:onProgressChanged")
+        }
+
+        override fun onStopTrackingTouch(bar: SeekBar) {
+
+            doVideoLog("${VideoFragment::class.java.simpleName}:onStopTrackingTouch")
+        }
     }
 }
