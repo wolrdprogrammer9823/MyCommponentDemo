@@ -2,7 +2,6 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
@@ -24,8 +23,33 @@
             android:id="@+id/play_pause_iv"
             android:layout_width="@dimen/video_dp_45"
             android:layout_height="@dimen/video_dp_45"
-            android:src="@drawable/ic_baseline_play_arrow_24"
+            android:src="@drawable/video_play_arrow_24"
             android:layout_gravity="center"/>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/video_title_ll"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/video_dp_30"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:layout_gravity="top|center_horizontal">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/video_back_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:src="@drawable/video_arrow_back_24"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/video_title_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/video_dp_10"
+                android:gravity="center"
+                android:text="@string/video_title"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
     </com.heng.video.widgets.DefinePLVideoView>
 
     <SeekBar

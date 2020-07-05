@@ -37,6 +37,6 @@
         android:id="@+id/media_zoom_iv"
         android:layout_width="@dimen/video_dp_25"
         android:layout_height="@dimen/video_dp_25"
-        android:src="@drawable/ic_baseline_crop_free_24" />
+        android:src="@drawable/video_crop_free_24" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>

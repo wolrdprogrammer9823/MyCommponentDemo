@@ -187,7 +187,8 @@ class DeMediaController : FrameLayout, IMediaController {
     }
 
     @SuppressLint("CheckResult")
-    private fun showPopupWindow() {
+    fun showPopupWindow() {
+        showProgressValue()
         showPopupWindow(DEFAULT_SHOW_TIME)
     }
 

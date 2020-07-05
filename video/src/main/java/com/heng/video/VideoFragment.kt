@@ -1,9 +1,9 @@
 package com.heng.video
-import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
@@ -56,6 +56,7 @@ class VideoFragment : BaseFragment(), ICommunication {
     override fun firstInit() {
         super.firstInit()
         play_pause_iv.setOnClickListener(onClickListener)
+        video_back_iv.setOnClickListener(onClickListener)
     }
 
     override fun initData() {
@@ -89,6 +90,8 @@ class VideoFragment : BaseFragment(), ICommunication {
 //        val mediaController = MediaController(requireContext(), true, false, pl_video_view)
 //        mediaController?.setOnClickSpeedAdjustListener(onClickSpeedAdjustListener)
 //        pl_video_view.setMediaController(mediaController)
+
+        pl_video_view.displayAspectRatio = PLVideoView.ASPECT_RATIO_PAVED_PARENT
 
         mediaController = DeMediaController(requireContext(), pl_video_view, this)
         pl_video_view.setMediaController(mediaController)
@@ -134,36 +137,36 @@ class VideoFragment : BaseFragment(), ICommunication {
         return resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        doVideoLog("requestCode:$requestCode,resultCode:$resultCode")
-        when (requestCode) {
-            VIDEO_PLAY_PAUSE_CODE -> {
-                if (resultCode == VIDEO_PLAY_PAUSE_CODE) {
-                    if (data == null || "".equals(data)) {
-                        doVideoLog("data == null || “”.equals(data)")
-                        return
-                    }
-                    val mVideoIsPlayed = data.getBooleanExtra(VIDEO_IS_PLAYED, false)
-                    val mVideoCurrentPosition = data.getLongExtra(VIDEO_CURRENT_POSITION, 0L)
-                    doVideoLog("mVideoIsPlayed:${mVideoIsPlayed}")
-
-                    if (mVideoIsPlayed) {
-                        pl_video_view.start()
-                        if (mVideoCurrentPosition != 0L) {
-                            mediaController.seekToPosition(mVideoCurrentPosition)
-                        }
-                        pl_video_view.start()
-                    } else {
-                        pl_video_view.pause()
-                    }
-                    setPlayPauseIvBg(!mVideoIsPlayed)
-                }
-            }
-            else -> {
-            }
-        }
-    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        doVideoLog("requestCode:$requestCode,resultCode:$resultCode")
+//        when (requestCode) {
+//            VIDEO_PLAY_PAUSE_CODE -> {
+//                if (resultCode == VIDEO_PLAY_PAUSE_CODE) {
+//                    if (data == null || "".equals(data)) {
+//                        doVideoLog("data == null || “”.equals(data)")
+//                        return
+//                    }
+//                    val mVideoIsPlayed = data.getBooleanExtra(VIDEO_IS_PLAYED, false)
+//                    val mVideoCurrentPosition = data.getLongExtra(VIDEO_CURRENT_POSITION, 0L)
+//                    doVideoLog("mVideoIsPlayed:${mVideoIsPlayed}")
+//
+//                    if (mVideoIsPlayed) {
+//                        pl_video_view.start()
+//                        if (mVideoCurrentPosition != 0L) {
+//                            mediaController.seekToPosition(mVideoCurrentPosition)
+//                        }
+//                        pl_video_view.start()
+//                    } else {
+//                        pl_video_view.pause()
+//                    }
+//                    setPlayPauseIvBg(!mVideoIsPlayed)
+//                }
+//            }
+//            else -> {
+//            }
+//        }
+//    }
 
     override fun navigationToActivity(flag : Int) {
         when (flag) {
@@ -184,6 +187,10 @@ class VideoFragment : BaseFragment(), ICommunication {
                 newLayoutParam.height = FrameLayout.LayoutParams.MATCH_PARENT
                 pl_video_view.layoutParams = newLayoutParam
 
+                video_title_ll.visibility = View.VISIBLE
+
+                requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
+                        or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
                 requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
             }
             VIDEO_ZOOM_IN -> {
@@ -197,6 +204,8 @@ class VideoFragment : BaseFragment(), ICommunication {
                 newLayoutParam.height = resources.getDimension(R.dimen.video_dp_300).toInt()
                 pl_video_view.layoutParams = newLayoutParam
 
+                video_title_ll.visibility = View.GONE
+                requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
                 requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
             }
             else -> {}
@@ -284,12 +293,17 @@ class VideoFragment : BaseFragment(), ICommunication {
                     pl_video_view.pause()
                 } else {
                     pl_video_view.start()
+                    mediaController.showPopupWindow()
                 }
 
                 inPlayState = !playing
                 setPlayPauseIvBg(playing)
 
                 doVideoLog("duration:${CdTimeUtil.generateTime(pl_video_view.duration)}")
+            }
+            R.id.video_back_iv -> {
+
+                navigationToActivity(VIDEO_ZOOM_IN)
             }
             else -> {
             }
@@ -321,10 +335,10 @@ class VideoFragment : BaseFragment(), ICommunication {
     private fun setPlayPauseIvBg(playing: Boolean) {
         val resId = if (playing) {
             //暂停状态
-            R.drawable.ic_baseline_play_arrow_24
+            R.drawable.video_play_arrow_24
         } else {
             //播放状态
-            R.drawable.ic_baseline_pause_24
+            R.drawable.video_pause_24
         }
 
         play_pause_iv?.setImageResource(resId)

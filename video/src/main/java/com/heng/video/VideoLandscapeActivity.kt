@@ -90,7 +90,7 @@ class VideoLandscapeActivity : BaseActivity() , ICommunication{
         super.onPause()
         if (landscape_pl_video_view != null && landscape_pl_video_view.isPlaying) {
             landscape_pl_video_view.pause()
-            landscape_play_pause_iv.setImageResource(R.drawable.ic_baseline_play_arrow_24)
+            landscape_play_pause_iv.setImageResource(R.drawable.video_play_arrow_24)
         }
     }
 
@@ -164,10 +164,10 @@ class VideoLandscapeActivity : BaseActivity() , ICommunication{
     private fun setPlayPauseIvBg(playing: Boolean) {
         val resId = if (playing) {
             //暂停状态
-            R.drawable.ic_baseline_play_arrow_24
+            R.drawable.video_play_arrow_24
         } else {
             //播放状态
-            R.drawable.ic_baseline_pause_24
+            R.drawable.video_pause_24
         }
         landscape_play_pause_iv.setImageResource(resId)
     }
