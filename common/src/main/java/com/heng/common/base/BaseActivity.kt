@@ -3,9 +3,13 @@ import android.os.Build
 import android.os.Bundle
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
+import com.heng.common.R
+import com.heng.common.define.toast
 import com.heng.common.util.StatusBarUtil
 
 abstract class BaseActivity : AppCompatActivity() {
+
+    private var currentTime = 0L
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -16,6 +20,7 @@ abstract class BaseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         initWindow()
         if (initArgs(intent.extras)) {
+            beforeContentView()
             setContentView(getContentLayoutId())
             initBefore()
             initWidget()
@@ -51,8 +56,14 @@ abstract class BaseActivity : AppCompatActivity() {
                 }
             }
         }
-        super.onBackPressed()
-        finish()
+
+        if (System.currentTimeMillis() - currentTime < 2000L) {
+            super.onBackPressed()
+            finish()
+        } else {
+            currentTime = System.currentTimeMillis()
+            toast(R.string.double_click_exit)
+        }
     }
 
     open fun setNavigationBarBgColor(@ColorRes colorRes: Int) {
@@ -76,6 +87,9 @@ abstract class BaseActivity : AppCompatActivity() {
             StatusBarUtil.setStatusBarColor(this,0x55000000)
         }
     }
+
+    /*调用setContentView()之前调用*/
+    open fun beforeContentView() {}
 
     /*初始化控件之前调用*/
     open fun initBefore() {}

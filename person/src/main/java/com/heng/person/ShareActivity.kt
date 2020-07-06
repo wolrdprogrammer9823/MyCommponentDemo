@@ -10,6 +10,11 @@ class ShareActivity : BaseActivity() {
 
     private var tag = ShareActivity::class.java.simpleName
 
+    override fun beforeContentView() {
+        super.beforeContentView()
+        overridePendingTransition(R.anim.slide_in_right, 0)
+    }
+
     override fun initBefore() {
         super.initBefore()
         ARouter.getInstance().inject(this)
@@ -28,4 +33,9 @@ class ShareActivity : BaseActivity() {
     }
 
     override fun getContentLayoutId(): Int = R.layout.person_activity_share
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(0, R.anim.slide_out_left)
+    }
 }

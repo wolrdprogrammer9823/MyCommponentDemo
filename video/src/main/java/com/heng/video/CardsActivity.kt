@@ -9,7 +9,6 @@ import com.heng.common.entity.Computer
 import com.heng.common.log.PERSON_COMPUTER
 import com.heng.common.log.PERSON_NAME
 import com.heng.common.log.PERSON_NUMBER
-import com.heng.common.log.doPersonLog
 
 @Route(path = CommonConstant.TO_CARDS_ACTIVITY)
 class CardsActivity : BaseActivity() {
@@ -26,6 +25,11 @@ class CardsActivity : BaseActivity() {
     @Autowired(name = PERSON_COMPUTER)
     var computer: Computer? = null
 
+    override fun beforeContentView() {
+        super.beforeContentView()
+        overridePendingTransition(R.anim.slide_in_right, 0)
+    }
+
     override fun initWidget() {
         super.initWidget()
         ARouter.getInstance().inject(this)
@@ -38,4 +42,8 @@ class CardsActivity : BaseActivity() {
 
     override fun getContentLayoutId(): Int = R.layout.video_activity_cards
 
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(0, R.anim.slide_out_left)
+    }
 }
