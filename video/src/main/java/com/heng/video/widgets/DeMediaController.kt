@@ -46,7 +46,7 @@ class DeMediaController : FrameLayout, IMediaController {
 
     var mScreenState = VIDEO_ZOOM_OUT
 
-    private var showingProgressBar = false
+    private var showingPop = false
 
     private var disposable: Disposable? = null
 
@@ -83,6 +83,11 @@ class DeMediaController : FrameLayout, IMediaController {
         this.mICommunication = mICommunication
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        doVideoLog(TAG,"override fun onConfigurationChanged(newConfig: Configuration?)")
+    }
+
     override fun setMediaPlayer(mediaPlayerControl: IMediaController.MediaPlayerControl) {
 
         this.mediaPlayerControl = mediaPlayerControl
@@ -97,15 +102,27 @@ class DeMediaController : FrameLayout, IMediaController {
             if (System.currentTimeMillis() - currentTime >= DEFAULT_SHOW_TIME) {
 
                 show(DEFAULT_SHOW_TIME)
+                doVideoLog(TAG,"show()111111111111")
+                showingPop = true
             } else {
 
-                mPopupWindow?.let {
-                    if (it.isShowing) {
-                        it.dismiss()
+                showingPop = if (showingPop) {
+
+                    mPopupWindow?.let {
+                        if (it.isShowing) {
+                            it.dismiss()
+                        }
                     }
+                    disposable?.dispose()
+                    false
+                } else {
+
+                    show(DEFAULT_SHOW_TIME)
+                    true
                 }
-                disposable?.dispose()
-                show(DEFAULT_SHOW_TIME)
+
+                doVideoLog(TAG,"show()->${mPopupWindow?.isShowing}")
+                doVideoLog(TAG,"show()222222222222")
             }
 
             currentTime = System.currentTimeMillis()
@@ -126,7 +143,7 @@ class DeMediaController : FrameLayout, IMediaController {
 
     override fun isShowing(): Boolean {
         doVideoLog(TAG, "isShowing()")
-        return showingProgressBar
+        return false
     }
 
     override fun setEnabled(b: Boolean) {
@@ -141,6 +158,7 @@ class DeMediaController : FrameLayout, IMediaController {
             doVideoLog(TAG,"smScreenState:$mScreenState")
             hidePopupWindow()
             mICommunication?.navigationToActivity(mScreenState)
+            //showPopupWindow(DEFAULT_SHOW_TIME)
         }
 
         doVideoLog(TAG, "(media_seek_bar != null)->${media_seek_bar != null}")
@@ -180,7 +198,7 @@ class DeMediaController : FrameLayout, IMediaController {
         mPopupWindow?.setBackgroundDrawable(null)
         mPopupWindow?.isFocusable = false
         mPopupWindow?.isOutsideTouchable = true
-        mPopupWindow?.animationStyle = android.R.anim.fade_in
+        mPopupWindow?.animationStyle = R.style.PopupWindow_Animation_Theme
         mPopupWindow?.width = LinearLayoutCompat.LayoutParams.MATCH_PARENT
         mPopupWindow?.height =
             TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30F, resources.displayMetrics).toInt()
