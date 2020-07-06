@@ -8,6 +8,7 @@ import com.alibaba.android.arouter.facade.annotation.Route
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.heng.common.CommonConstant
 import com.heng.common.base.BaseActivity
+import com.heng.common.define.toast
 import com.heng.home.HomeFragment
 import com.heng.person.PersonFragment
 import com.heng.video.VideoFragment
@@ -32,6 +33,8 @@ class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelec
             else View.VISIBLE
         }
     }
+
+    override fun showToastWhenOnBackPressed(): Boolean = true
 
     override fun onDestroy() {
         super.onDestroy()
@@ -107,5 +110,6 @@ class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelec
     }
 
     var currentIndex = 0
+    private var currentTime = 0L
     private var fragments = arrayOfNulls<Fragment>(3)
 }

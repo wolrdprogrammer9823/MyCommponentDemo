@@ -57,12 +57,17 @@ abstract class BaseActivity : AppCompatActivity() {
             }
         }
 
-        if (System.currentTimeMillis() - currentTime < 2000L) {
+        if (showToastWhenOnBackPressed()) {
+            if (System.currentTimeMillis() - currentTime < 2000L) {
+                super.onBackPressed()
+                finish()
+            } else {
+                currentTime = System.currentTimeMillis()
+                toast(R.string.double_click_exit)
+            }
+        } else {
             super.onBackPressed()
             finish()
-        } else {
-            currentTime = System.currentTimeMillis()
-            toast(R.string.double_click_exit)
         }
     }
 
@@ -103,6 +108,11 @@ abstract class BaseActivity : AppCompatActivity() {
     /*初始相关的参数*/
     open fun initArgs(bundle: Bundle?) : Boolean{
         return true
+    }
+
+    /*按返回键时是否显示‘再按一次退出’提示*/
+    open fun showToastWhenOnBackPressed() : Boolean{
+        return false
     }
 
     abstract fun getContentLayoutId() : Int
