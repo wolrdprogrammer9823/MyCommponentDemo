@@ -16,7 +16,6 @@ import kotlinx.android.synthetic.main.main_activity_main.*
 @Route(path = CommonConstant.TO_MAIN_ACTIVITY)
 class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelectedListener {
 
-
     override fun initWidget() {
         super.initWidget()
         navigation_view.setOnNavigationItemSelectedListener(this)
@@ -32,6 +31,11 @@ class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelec
             navigation_view.visibility = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) View.GONE
             else View.VISIBLE
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        CommonConstant.currentBottomViewIndex = 0
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -87,6 +91,7 @@ class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelec
             fragments[0]?.let { transaction.add(R.id.fl_content, it) }
         }
         hideAndShowFragment(currentIndex, transaction)
+        CommonConstant.currentBottomViewIndex = currentIndex
     }
 
     private fun hideAndShowFragment(index: Int, transaction: FragmentTransaction) {
@@ -98,8 +103,9 @@ class MainActivity : BaseActivity() , BottomNavigationView.OnNavigationItemSelec
         fragments[index]?.let { transaction.show(it) }
         transaction.commit()
         currentIndex = index
+        CommonConstant.currentBottomViewIndex = currentIndex
     }
 
-    private var currentIndex = 0
+    var currentIndex = 0
     private var fragments = arrayOfNulls<Fragment>(3)
 }

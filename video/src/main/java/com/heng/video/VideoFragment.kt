@@ -7,6 +7,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
+import com.heng.common.CommonConstant
 import com.heng.common.base.BaseFragment
 import com.heng.common.log.*
 import com.heng.common.util.CdTimeUtil
@@ -109,7 +110,9 @@ class VideoFragment : BaseFragment(), ICommunication {
     override fun onResume() {
         super.onResume()
         doVideoLog("override fun onResume()")
-        if (pl_video_view != null && inPlayState) {
+        //在onResume中要判断当前选择的底部item对应的Fragment是否是目标Fragment
+        //此处通过共享变量的形式来标记
+        if (pl_video_view != null && inPlayState && CommonConstant.currentBottomViewIndex == 1) {
             pl_video_view.start()
             setPlayPauseIvBg(false)
         }
@@ -119,7 +122,9 @@ class VideoFragment : BaseFragment(), ICommunication {
         super.onPause()
         doVideoLog("override fun onPause()")
         mediaController.mPopupWindow?.dismiss()
-        if (pl_video_view != null && pl_video_view.isPlaying) {
+        //在onPause中要判断当前选择的底部item对应的Fragment是否是目标Fragment
+        //此处通过共享变量的形式来标记
+        if (pl_video_view != null && pl_video_view.isPlaying && CommonConstant.currentBottomViewIndex == 1) {
             pl_video_view.pause()
             setPlayPauseIvBg(true)
         }

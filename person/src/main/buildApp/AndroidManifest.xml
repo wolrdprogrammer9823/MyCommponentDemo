@@ -22,7 +22,7 @@
 
         <activity
             android:name=".ShareActivity"
-            android:theme="@style/BaseTheme"/>
+            android:theme="@style/Animation_BaseTheme"/>
     </application>
 
 </manifest>

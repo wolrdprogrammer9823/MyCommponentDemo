@@ -36,7 +36,9 @@
             android:screenOrientation="landscape">
         </activity>
 
-        <activity android:name=".CardsActivity" />
+        <activity
+            android:name=".CardsActivity"
+            android:theme="@style/Animation_BaseTheme" />
 
     </application>
 

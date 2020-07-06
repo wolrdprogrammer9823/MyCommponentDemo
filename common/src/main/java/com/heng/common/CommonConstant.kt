@@ -41,4 +41,6 @@ object CommonConstant {
     //Toast 吐司框
     @JvmField
     var toast : Toast? = null
+
+    var currentBottomViewIndex = 0
 }

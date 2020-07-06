@@ -4,9 +4,12 @@
 
     <application>
         <activity
-            android:name=".PersonActivity"/>
+            android:name=".PersonActivity"
+            android:theme="@style/BaseTheme"/>
+
         <activity
-            android:name=".ShareActivity"/>
+            android:name=".ShareActivity"
+            android:theme="@style/Animation_BaseTheme"/>
     </application>
 
 </manifest>
