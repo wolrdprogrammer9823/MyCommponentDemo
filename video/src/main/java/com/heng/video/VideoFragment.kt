@@ -2,6 +2,7 @@ package com.heng.video
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.OrientationEventListener
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
@@ -30,8 +31,11 @@ class VideoFragment : BaseFragment(), ICommunication {
     private var param2: String? = null
 
     private lateinit var mediaController: DeMediaController
+    private lateinit var orientationEventListener: OrientationEventListener
 
     private var inPlayState = false
+    private var mIsFullScreen = false
+
     private var mDisplayAspectRatio = PLVideoView.ASPECT_RATIO_FIT_PARENT
 
     companion object {
@@ -98,6 +102,45 @@ class VideoFragment : BaseFragment(), ICommunication {
         pl_video_view.setMediaController(mediaController)
 
         test_media_seek_bar.setOnSeekBarChangeListener(mSeekListener)
+
+        orientationEventListener = object : OrientationEventListener(requireContext()) {
+            override fun onOrientationChanged(orientation: Int) {
+
+                if (orientation == ORIENTATION_UNKNOWN) {
+                    return
+                }
+
+                val newOrientation = if (orientation > 350 || orientation < 10) {
+                    doVideoLog("newOrientation = 0")
+                    0
+                } else if (orientation in 81..99) {
+                    doVideoLog("newOrientation = 90")
+                    if (mIsFullScreen) {
+                        videoZoom(VIDEO_ZOOM_OUT_90,false)
+                    }
+                    90
+                } else if (orientation in 171..189) {
+                    doVideoLog("newOrientation = 180")
+                    180
+                } else if (orientation in 261..279) {
+                    doVideoLog("newOrientation = 270")
+                    if (mIsFullScreen) {
+                        videoZoom(VIDEO_ZOOM_OUT_270,false)
+                    }
+                    270
+                } else {
+                    return
+                }
+            }
+        }
+
+        if (orientationEventListener.canDetectOrientation()) {
+
+            orientationEventListener.enable()
+        } else {
+
+            orientationEventListener.disable()
+        }
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
@@ -135,6 +178,8 @@ class VideoFragment : BaseFragment(), ICommunication {
         if (pl_video_view != null) {
             pl_video_view.stopPlayback()
         }
+
+        orientationEventListener.disable()
     }
 
     override fun onBackPressed(): Boolean {
@@ -175,7 +220,7 @@ class VideoFragment : BaseFragment(), ICommunication {
 
     override fun navigationToActivity(flag : Int) {
         when (flag) {
-            VIDEO_ZOOM_OUT -> {
+            VIDEO_ZOOM_OUT, VIDEO_ZOOM_OUT_270 -> {
 
                 //val dataIntent = Intent(requireContext(), VideoLandscapeActivity::class.java)
                 //dataIntent.putExtra(VIDEO_PATH, path)
@@ -183,35 +228,19 @@ class VideoFragment : BaseFragment(), ICommunication {
                 //dataIntent.putExtra(VIDEO_IS_PLAYED, pl_video_view!!.isPlaying)
                 //startActivityForResult(dataIntent, VIDEO_PLAY_PAUSE_CODE)
 
-                //videoNotScaled = false
-
                 doVideoLog("${VideoFragment::class.java.simpleName}:VIDEO_ZOOM_OUT->$VIDEO_ZOOM_OUT")
+                videoZoom(flag, false)
+            }
+            VIDEO_ZOOM_OUT_90 -> {
 
-                val newLayoutParam = pl_video_view.layoutParams as FrameLayout.LayoutParams
-                newLayoutParam.width = FrameLayout.LayoutParams.MATCH_PARENT
-                newLayoutParam.height = FrameLayout.LayoutParams.MATCH_PARENT
-                pl_video_view.layoutParams = newLayoutParam
-
-                video_title_ll.visibility = View.VISIBLE
-
-                requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
-                        or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
-                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                doVideoLog("${VideoFragment::class.java.simpleName}:VIDEO_ZOOM_OUT_90->$VIDEO_ZOOM_OUT_90")
+                videoZoom(VIDEO_ZOOM_OUT_90, false)
             }
             VIDEO_ZOOM_IN -> {
 
                 doVideoLog("${VideoFragment::class.java.simpleName}:VIDEO_ZOOM_IN->$VIDEO_ZOOM_IN")
-
                 mediaController.hidePopupWindow()
-
-                val newLayoutParam = pl_video_view.layoutParams as FrameLayout.LayoutParams
-                newLayoutParam.width = FrameLayout.LayoutParams.MATCH_PARENT
-                newLayoutParam.height = resources.getDimension(R.dimen.video_dp_300).toInt()
-                pl_video_view.layoutParams = newLayoutParam
-
-                video_title_ll.visibility = View.GONE
-                requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                videoZoom(VIDEO_ZOOM_IN, true)
             }
             else -> {}
         }
@@ -349,6 +378,42 @@ class VideoFragment : BaseFragment(), ICommunication {
         play_pause_iv?.setImageResource(resId)
     }
 
+    private fun videoZoom(zoomFlag: Int, zoomIn: Boolean) {
+
+        val newLayoutParam = pl_video_view.layoutParams as FrameLayout.LayoutParams
+        newLayoutParam.width = FrameLayout.LayoutParams.MATCH_PARENT
+        when (zoomFlag) {
+            VIDEO_ZOOM_OUT, VIDEO_ZOOM_OUT_90, VIDEO_ZOOM_OUT_270 -> {
+                newLayoutParam.height = FrameLayout.LayoutParams.MATCH_PARENT
+            }
+            VIDEO_ZOOM_IN -> {
+                newLayoutParam.height = resources.getDimension(R.dimen.video_dp_300).toInt()
+            }
+        }
+        pl_video_view.layoutParams = newLayoutParam
+
+        video_title_ll.visibility = if (zoomIn) View.GONE else View.VISIBLE
+        if (zoomIn) {
+            requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        } else {
+            requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        }
+
+        when (zoomFlag) {
+            VIDEO_ZOOM_OUT, VIDEO_ZOOM_OUT_270 -> {
+                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                mIsFullScreen = true
+            }
+            VIDEO_ZOOM_OUT_90 -> {
+                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                mIsFullScreen = true
+            }
+            VIDEO_ZOOM_IN -> {
+                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                mIsFullScreen = false
+            }
+        }
+    }
 
     private val mSeekListener = object : OnSeekBarChangeListener {
         override fun onStartTrackingTouch(bar: SeekBar) {
@@ -369,4 +434,5 @@ class VideoFragment : BaseFragment(), ICommunication {
             doVideoLog("${VideoFragment::class.java.simpleName}:onStopTrackingTouch")
         }
     }
+
 }

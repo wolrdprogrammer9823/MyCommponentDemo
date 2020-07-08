@@ -34,7 +34,8 @@ class DeMediaController : FrameLayout, IMediaController {
     private var audioManager: AudioManager? = null
     private var mICommunication: ICommunication? = null
 
-    var mRootView: View? = null
+    private var mRootView: View? = null
+
     var mPopupWindow: PopupWindow? = null
 
     private var mVideoPlayed = false
@@ -163,7 +164,6 @@ class DeMediaController : FrameLayout, IMediaController {
 
         doVideoLog(TAG, "(media_seek_bar != null)->${media_seek_bar != null}")
         if (media_seek_bar != null) {
-
             media_seek_bar.setOnSeekBarChangeListener(onSeekBarChangeListener)
             media_seek_bar.thumbOffset = 1
             media_seek_bar.max = 100

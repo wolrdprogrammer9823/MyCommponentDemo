@@ -11,6 +11,8 @@ const val VIDEO_PLAY_PAUSE_CODE = 0x01
 
 const val VIDEO_ZOOM_IN = 0x02
 const val VIDEO_ZOOM_OUT = 0x03
+const val VIDEO_ZOOM_OUT_90 = 0x04
+const val VIDEO_ZOOM_OUT_270 = 0x05
 
 fun doVideoLog(msg: String) {
     Log.d(VIDEO_LOG, msg)
