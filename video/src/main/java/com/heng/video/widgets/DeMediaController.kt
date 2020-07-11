@@ -155,11 +155,17 @@ class DeMediaController : FrameLayout, IMediaController {
     override fun setAnchorView(view: View) {
         doVideoLog(TAG,"setAnchorView(View view):${view != null}")
         media_zoom_iv.setOnClickListener {
+
             mScreenState = if (context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) VIDEO_ZOOM_OUT else VIDEO_ZOOM_IN
             doVideoLog(TAG,"smScreenState:$mScreenState")
+
+            disposable?.dispose()
             hidePopupWindow()
+
             mICommunication?.navigationToActivity(mScreenState)
-            //showPopupWindow(DEFAULT_SHOW_TIME)
+            view.post {
+                showPopupWindow(DEFAULT_SHOW_TIME)
+            }
         }
 
         doVideoLog(TAG, "(media_seek_bar != null)->${media_seek_bar != null}")

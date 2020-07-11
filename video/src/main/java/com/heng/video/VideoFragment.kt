@@ -35,6 +35,7 @@ class VideoFragment : BaseFragment(), ICommunication {
 
     private var inPlayState = false
     private var mIsFullScreen = false
+    private var onBackPressed = false
 
     private var mDisplayAspectRatio = PLVideoView.ASPECT_RATIO_FIT_PARENT
 
@@ -183,6 +184,7 @@ class VideoFragment : BaseFragment(), ICommunication {
     }
 
     override fun onBackPressed(): Boolean {
+        onBackPressed = true
         navigationToActivity(VIDEO_ZOOM_IN)
         return resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
@@ -239,7 +241,10 @@ class VideoFragment : BaseFragment(), ICommunication {
             VIDEO_ZOOM_IN -> {
 
                 doVideoLog("${VideoFragment::class.java.simpleName}:VIDEO_ZOOM_IN->$VIDEO_ZOOM_IN")
-                mediaController.hidePopupWindow()
+                if (onBackPressed) {
+                    mediaController.hidePopupWindow()
+                    onBackPressed = false
+                }
                 videoZoom(VIDEO_ZOOM_IN, true)
             }
             else -> {}
