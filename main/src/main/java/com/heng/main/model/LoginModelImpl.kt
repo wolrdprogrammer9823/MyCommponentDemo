@@ -8,6 +8,7 @@ import com.heng.common.define.cancelByActive
 import com.heng.common.define.tryCatch
 import com.heng.common.network.retrofit.RetrofitHelper
 import com.heng.common.network.retrofit.bean.LoginResponse
+import com.heng.common.util.MD5Util
 import com.heng.main.presenter.ILoginPresenter
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
@@ -54,10 +55,12 @@ class LoginModelImpl(context: Context) : ILoginModel {
 //       }
 
         val succeed = runBlocking(Dispatchers.IO) {
+            //数据库中存储的MD5加密后的数据,传入的数据已经加密过则直接查询,没有则加密后再查询.
             userDao.queryUser(userName, password)
+                    || userDao.queryUser(userName, MD5Util.getMD5Code(password))
         }
-        loginPresenter.loginSuccess(succeed = succeed)
 
+        loginPresenter.loginSuccess(succeed = succeed)
     }
 
     override fun cancelLoginRequest() {

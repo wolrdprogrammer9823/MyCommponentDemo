@@ -13,6 +13,7 @@ import com.heng.common.define.toast
 import com.heng.common.log.doAppLog
 import com.heng.common.network.retrofit.RetrofitHelper
 import com.heng.common.network.retrofit.bean.LoginResponse
+import com.heng.common.util.MD5Util
 import com.heng.main.presenter.LoginPresenterImpl
 import com.heng.main.view.ILoginView
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
@@ -121,7 +122,7 @@ class LoginActivity : BaseActivity() ,ILoginView {
         doAppLog("succeed:$succeed")
         if (succeed) {
             mUserName = username_et.text.toString().trim()
-            mPassword = password_et.text.toString().trim()
+            mPassword = MD5Util.getMD5Code(password_et.text.toString().trim())
         }
 
 //        mUserName = result.data.username
@@ -142,9 +143,10 @@ class LoginActivity : BaseActivity() ,ILoginView {
                 if (checkContent()) {
                     login_progressbar.visibility = View.VISIBLE
                     loginPresenterImpl.registerToWanAndroidAsync(
-                        username_et.text.trim().toString(),
-                        password_et.text.trim().toString(),
-                        password_et.text.trim().toString())
+                        username_et.text.toString().trim(),
+                        MD5Util.getMD5Code(password_et.text.toString().trim()),
+                        MD5Util.getMD5Code(password_et.text.toString().trim())
+                    )
                 }
             }
             R.id.login_btn->{
