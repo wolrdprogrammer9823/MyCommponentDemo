@@ -1,5 +1,4 @@
 package com.heng.main.presenter
-import com.heng.common.network.retrofit.bean.LoginResponse
 
 interface ILoginPresenter {
 
@@ -7,7 +6,7 @@ interface ILoginPresenter {
     fun loginToWanAndroidAsync(userName: String, password: String)
 
     //登录成功
-    fun loginSuccess(result: LoginResponse)
+    fun loginSuccess(succeed: Boolean)
 
     //登录失败
     fun longFailed(message: String?)
@@ -16,7 +15,7 @@ interface ILoginPresenter {
     fun registerToWanAndroidAsync(userName: String, password: String, repassword: String)
 
     //注册成功
-    fun registerSuccess(result: LoginResponse)
+    fun registerSuccess(succeed: Boolean)
 
     //注册失败
     fun registerFailed(message: String?)

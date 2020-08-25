@@ -81,16 +81,27 @@ dependencies {
 
     implementation deps.multidex
 
+    implementation deps.roomRuntime
+    implementation deps.roomRxjava2
+    kapt           deps.roomCompiler
+
+    testImplementation deps.roomTest
+
     testImplementation deps.junit
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore
+
     implementation project(path: ':common')
+    implementation project(path: ':dataStore')
+
     if (!isBuildHomeApp.toBoolean()) {
         implementation project(path: ':home')
     }
+
     if (!isBuildVideoApp.toBoolean()) {
         implementation project(path: ':video')
     }
+
     if (!isBuildPersonApp.toBoolean()) {
         implementation project(path: ':person')
     }

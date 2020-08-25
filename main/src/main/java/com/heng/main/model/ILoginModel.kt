@@ -26,4 +26,6 @@ interface ILoginModel {
     //取消注册
     fun cancelRegisterRequest()
 
+
+    fun detach()
 }

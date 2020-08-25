@@ -32,11 +32,15 @@ object CommonConstant {
     const val USERNAME_KEY = "username"
     const val PASSWORD_KEY = "password"
 
+    const val REGISTER_SUCCEED = 0x01
+    const val REGISTER_FAILED = 0x02
+    const val LOGIN_SUCCEED = 0x03
+    const val LOGIN_FAILED = 0x04
+
     const val CONTENT_TITLE_KEY = "title"
 
     //debug
     const val INTERCEPTOR_ENABLE = false
-
 
     //Toast 吐司框
     @JvmField

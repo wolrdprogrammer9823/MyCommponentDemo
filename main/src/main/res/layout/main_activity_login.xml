@@ -25,13 +25,14 @@
        android:layout_above="@id/password_layout"
        android:orientation="horizontal"
        app:hintTextAppearance="@style/TextAppearance.AppCompat.Large">
-
+       <!--
+          android:text="bigone"
+       -->
        <EditText
            android:id="@+id/username_et"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
            android:hint="@string/main_prompt_username"
-           android:text="bigone"
            android:maxLines="1"
            android:singleLine="true"/>
    </com.google.android.material.textfield.TextInputLayout>
@@ -42,13 +43,14 @@
        android:layout_height="wrap_content"
        android:layout_centerInParent="true"
        app:hintTextAppearance="@style/TextAppearance.AppCompat.Large">
-
+       <!--
+          android:text="1234567"
+       -->
        <EditText
            android:id="@+id/password_et"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
            android:hint="@string/main_prompt_password"
-           android:text="1234567"
            android:imeActionId="6"
            android:imeActionLabel="@string/main_action_sign_in_short"
            android:imeOptions="actionUnspecified"

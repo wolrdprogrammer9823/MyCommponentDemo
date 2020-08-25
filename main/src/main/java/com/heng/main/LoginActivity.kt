@@ -5,6 +5,7 @@ import android.text.TextUtils
 import android.view.View
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.alibaba.android.arouter.launcher.ARouter
+import com.component.datastore.database.RoomData
 import com.heng.common.CommonConstant
 import com.heng.common.base.BaseActivity
 import com.heng.common.define.Preference
@@ -34,19 +35,19 @@ class LoginActivity : BaseActivity() ,ILoginView {
     private var mPassword by Preference(CommonConstant.PASSWORD_KEY, "")
 
     private val loginPresenterImpl : LoginPresenterImpl by lazy {
-        LoginPresenterImpl(this)
+        LoginPresenterImpl(this, this)
     }
 
-    private val gitHubServiceApi by lazy {
-        val retrofit = retrofit2.Retrofit.Builder()
-            .baseUrl("https://api.github.com")
-            //.baseUrl(CommonConstant.REQUEST_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            //添加对 Deferred 的支持
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
-            .build()
-        retrofit.create(GitHubServiceApi::class.java)
-    }
+//    private val gitHubServiceApi by lazy {
+//        val retrofit = retrofit2.Retrofit.Builder()
+//            .baseUrl("https://api.github.com")
+//            //.baseUrl(CommonConstant.REQUEST_BASE_URL)
+//            .addConverterFactory(GsonConverterFactory.create())
+//            //添加对 Deferred 的支持
+//            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+//            .build()
+//        retrofit.create(GitHubServiceApi::class.java)
+//    }
 
     override fun getContentLayoutId(): Int = R.layout.main_activity_login
 
@@ -55,6 +56,11 @@ class LoginActivity : BaseActivity() ,ILoginView {
         login_btn.setOnClickListener(onClickListener)
         register_btn.setOnClickListener(onClickListener)
         login_exit_iv.setOnClickListener(onClickListener)
+        doAppLog("mIsLogin:$mIsLogin")
+        if (mIsLogin) {
+            username_et.setText(mUserName)
+            password_et.setText(mPassword)
+        }
     }
 
     override fun onStop() {
@@ -64,42 +70,70 @@ class LoginActivity : BaseActivity() ,ILoginView {
         }
     }
 
-    override fun loginSuccess(result: LoginResponse) {
-        toast(getString(R.string.main_login_success))
+    override fun onDestroy() {
+        super.onDestroy()
+        loginPresenterImpl.releaseObj()
     }
 
-    override fun loginFailed(message: String?) {
+    override fun loginSuccess(resultCode: Int) {
+
+        toast(getString(R.string.main_login_success))
+
+        ARouter.getInstance().build(CommonConstant.TO_MAIN_ACTIVITY).greenChannel()
+            .navigation(this)
+        finish()
+    }
+
+    override fun loginFailed(resultCode: Int) {
+
+        toast(getString(R.string.main_login_failed))
+
         mIsLogin = false
         login_progressbar.visibility = View.GONE
-        message?.let {
-            toast(it)
-        }
     }
 
-    override fun registerSuccess(result: LoginResponse) {
+    override fun registerSuccess(resultCode: Int) {
+
         toast(getString(R.string.main_register_success))
+
+        ARouter.getInstance().build(CommonConstant.TO_MAIN_ACTIVITY).greenChannel()
+               .navigation(this)
+        finish()
     }
 
-    override fun registerFailed(errorMessage: String?) {
+    override fun registerFailed(resultCode: Int) {
+
+        toast(getString(R.string.main_register_failed))
+
         mIsLogin = false
         login_progressbar.visibility = View.GONE
         username_et.requestFocus()
-        errorMessage?.let {
-            toast(it)
-        }
+        username_et.setText("")
+        password_et.setText("")
     }
 
-    override fun loginRegisterAfter(result: LoginResponse) {
+    override fun loginRegisterAfter(resultCode: Int) {
         login_progressbar.visibility = View.GONE
+
         mIsLogin = true
-        mUserName = result.data.username
-        mPassword = result.data.password
-        setResult(Activity.RESULT_OK, Intent().apply {
-            putExtra(
-                CommonConstant.CONTENT_TITLE_KEY,
-                result.data.username
-            ) })
-        finish()
+
+        val succeed = (resultCode == CommonConstant.REGISTER_SUCCEED) or (resultCode == CommonConstant.LOGIN_SUCCEED)
+        doAppLog("succeed:$succeed")
+        if (succeed) {
+            mUserName = username_et.text.toString().trim()
+            mPassword = password_et.text.toString().trim()
+        }
+
+//        mUserName = result.data.username
+//        mPassword = result.data.password
+//        setResult(Activity.RESULT_OK, Intent().apply {
+//            putExtra(
+//                CommonConstant.CONTENT_TITLE_KEY,
+//                ""
+//            ) })
+
+//        startActivity(Intent(this, MainActivity::class.java))
+//        finish()
     }
 
     private val onClickListener = View.OnClickListener {
@@ -136,9 +170,10 @@ class LoginActivity : BaseActivity() ,ILoginView {
 //                        doAppLog(e.toString())
 //                    }
 
-                    ARouter.getInstance().build(CommonConstant.TO_MAIN_ACTIVITY).greenChannel()
-                        .navigation(this)
-                    finish()
+                    loginPresenterImpl.loginToWanAndroidAsync(
+                        username_et.text.trim().toString(),
+                        password_et.text.trim().toString()
+                    )
                 }
             }
             R.id.login_exit_iv->{

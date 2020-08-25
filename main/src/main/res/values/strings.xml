@@ -10,8 +10,10 @@
 
     <string name="main_login">登录</string>
     <string name="main_login_success">登录成功</string>
+    <string name="main_login_failed">登录失败</string>
     <string name="main_register">注册</string>
     <string name="main_register_success">注册成功</string>
+    <string name="main_register_failed">注册失败</string>
     <string name="main_username_cannot_null">用户名不能为空</string>
     <string name="main_password_cannot_null">密码不能为空</string>
     <string name="main_password_cannot_too_short">密码长度不能小于6位</string>

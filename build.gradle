@@ -7,6 +7,8 @@ ext {
     sourceCompatibility = "1.8"
     targetCompatibility = "1.8"
 
+    roomVersion = "1.1.1"
+
     compileSdkVersion = 29
     minSdkVersion = 26
     targetSdkVersion = 29
@@ -47,6 +49,12 @@ ext.deps = [
     annotation                       : 'androidx.annotation:annotation:1.0.2',
 
     multidex                         : 'androidx.multidex:multidex:2.0.0',
+
+    roomRuntime                      : "android.arch.persistence.room:runtime:$roomVersion",
+    roomCompiler                     :  "android.arch.persistence.room:compiler:$roomVersion",
+    roomRxjava2                      : "android.arch.persistence.room:rxjava2:$roomVersion",
+    roomGuava                        : "android.arch.persistence.room:guava:$roomVersion",
+    roomTest                         : "android.arch.persistence.room:testing:$roomVersion"
 ]
 
 subprojects { project ->
@@ -59,7 +67,7 @@ subprojects { project ->
         }
 
         dependencies {
-            classpath 'com.android.tools.build:gradle:3.6.3'
+            classpath 'com.android.tools.build:gradle:4.0.1'
             classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
             classpath "com.alibaba:arouter-register:1.0.2"
             // NOTE: Do not place your application dependencies here; they belong

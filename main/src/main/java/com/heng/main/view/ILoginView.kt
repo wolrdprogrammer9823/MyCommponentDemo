@@ -1,20 +1,19 @@
 package com.heng.main.view
-import com.heng.common.network.retrofit.bean.LoginResponse
 
 interface ILoginView {
 
     //登录成功
-    fun loginSuccess(result: LoginResponse)
+    fun loginSuccess(resultCode: Int)
 
     //登录失败
-    fun loginFailed(message: String?)
+    fun loginFailed(resultCode: Int)
 
     //注册成功
-    fun registerSuccess(result: LoginResponse)
+    fun registerSuccess(resultCode: Int)
 
     //注册失败
-    fun registerFailed(errorMessage: String?)
+    fun registerFailed(resultCode: Int)
 
     //登录注册后操作
-    fun loginRegisterAfter(result: LoginResponse)
+    fun loginRegisterAfter(resultCode: Int)
 }

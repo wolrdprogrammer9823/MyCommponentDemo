@@ -4,6 +4,7 @@ import androidx.multidex.MultiDexApplication
 import com.alibaba.android.arouter.launcher.ARouter
 import com.heng.common.BuildConfig
 import com.heng.common.CommonConstant
+import com.heng.common.define.Preference
 import com.heng.common.log.doCommonLog
 import com.heng.common.router.IComponentApplication
 
@@ -15,6 +16,8 @@ class BaseApplication : MultiDexApplication() {
         super.onCreate()
 
         instance = this
+
+        Preference.setContext(instance!!)
 
         /*初始化ARouter*/
         if (BuildConfig.DEBUG) {

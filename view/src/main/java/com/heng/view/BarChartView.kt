@@ -65,7 +65,7 @@ open class BarChartView : View {
         mRadius = mBarWidth.div(2).toInt()
 
         //计算第一条柱状图左边的位置
-        var barLeft = paddingLeft + step.div(2) - mRadius
+        var barLeft = paddingLeft + step / 2 - mRadius
 
         //通过坐标文本画笔计算第一个文本所占的矩形边界 获取其高度  为计算mMaxBarHeight提供数据
         mAxisPaint?.getTextBounds(mHorizontalAxis[0], 0, mHorizontalAxis[0].length, mTextRect)
@@ -181,6 +181,7 @@ open class BarChartView : View {
             bar.currentTop = bar.currentTop - BAR_STEP_GROW
             doPersonLog("mEnableGrowIncrement - > $i -> ${bar.currentTop}")
             //doPersonLog("mEnableGrowIncrement - > $i -> currentTop -> ${bar.currentTop <= bar.top}")
+            doPersonLog("mEnableGrowIncrement - > $i -> ${bar.top}")
             //计算出来的currentTop小于top 说明越界了
             if (bar.currentTop <= bar.top) {
                 bar.currentTop = bar.top
@@ -192,9 +193,13 @@ open class BarChartView : View {
                     mEnableGrowIncrement = false
                 }
             }
-
             //设置条形柱状图
-            mTempRectF?.set(bar.left.toFloat(),bar.currentTop.toFloat(),bar.right.toFloat(),bar.bottom.toFloat())
+            mTempRectF?.set(
+                bar.left.toFloat(),
+                bar.currentTop.toFloat(),
+                bar.right.toFloat(),
+                bar.bottom.toFloat()
+            )
             mBarPaint?.let { canvas?.drawRoundRect(mTempRectF!!, mRadius.toFloat(), mRadius.toFloat(), it) }
         }
 
